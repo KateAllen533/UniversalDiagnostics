@@ -293,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     ws.send(JSON.stringify(serverStatusMessage));
     
-    ws.on('message', (message) => {
+    ws.on('message', async (message) => {
       try {
         const parsedMessage = JSON.parse(message.toString()) as WebSocketMessage;
         const clientState = clients.get(ws);
@@ -316,16 +316,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             
             // Simulate connecting to vehicle
-            setTimeout(() => {
+            setTimeout(async () => {
               const success = true; // In a real implementation, this would depend on successful connection
               
               // Store settings if connected successfully
               if (success) {
-                // Create a diagnostic session in the database
-                let activeDiagnosticSessionId: number | null = null;
-                
                 // For demo purposes, we'll use a default vehicle ID of 1
                 // In a real application, this would be selected by the user
+                let sessionId: number | undefined;
+                
                 const createSession = async () => {
                   try {
                     // First, check if we have any vehicles in the database
@@ -355,13 +354,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       vehicleType: settings.vehicleType
                     });
                     
-                    activeDiagnosticSessionId = session.id;
-                    console.log(`Created diagnostic session with ID: ${activeDiagnosticSessionId}`);
+                    sessionId = session.id;
+                    console.log(`Created diagnostic session with ID: ${sessionId}`);
+                    
+                    // Update client state with the session ID
+                    const updatedClientState = clients.get(ws);
+                    if (updatedClientState) {
+                      clients.set(ws, {
+                        ...updatedClientState,
+                        diagnosticSessionId: sessionId
+                      });
+                    }
                   } catch (error) {
                     console.error('Error creating diagnostic session:', error);
                   }
                 };
                 
+                // Start the creation process
                 createSession();
                 
                 clients.set(ws, {
@@ -371,12 +380,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     if (ws.readyState === WebSocket.OPEN) {
                       const vehicleData = generateMockVehicleData(settings.vehicleType);
                       
-                      // Store the data in the database if we have an active session
-                      if (activeDiagnosticSessionId !== null) {
+                      // Get the latest client state to access the diagnosticSessionId
+                      const currentClientState = clients.get(ws);
+                      if (currentClientState?.diagnosticSessionId) {
                         try {
                           // Save the vehicle data point
                           await storage.createVehicleDataPoint({
-                            sessionId: activeDiagnosticSessionId,
+                            sessionId: currentClientState.diagnosticSessionId,
                             engineData: vehicleData.engineData,
                             batteryStatus: vehicleData.batteryStatus,
                             sensorData: vehicleData.sensorData,
@@ -386,9 +396,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                           
                           // If we have trouble codes, save them too
                           if (vehicleData.troubleCodes && vehicleData.troubleCodes.length > 0) {
-                            for (const code of vehicleData.troubleCodes) {
+                            for (const code of vehicleData.troubleCodes as TroubleCode[]) {
                               await storage.createTroubleCode({
-                                sessionId: activeDiagnosticSessionId,
+                                sessionId: currentClientState.diagnosticSessionId,
                                 code: code.code,
                                 description: code.description,
                                 severity: code.severity
@@ -438,6 +448,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               clearInterval(clientState.dataInterval);
             }
             
+            // End the diagnostic session if one was active
+            if (clientState.diagnosticSessionId) {
+              try {
+                const endedSession = await storage.endDiagnosticSession(clientState.diagnosticSessionId);
+                console.log(`Ended diagnostic session with ID: ${clientState.diagnosticSessionId}`);
+              } catch (error) {
+                console.error('Error ending diagnostic session:', error);
+              }
+            }
+            
             // Update client state
             clients.set(ws, {
               isConnected: false
@@ -463,13 +483,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
     
-    ws.on('close', () => {
+    ws.on('close', async () => {
       console.log('WebSocket client disconnected');
       
       // Clean up intervals when client disconnects
       const clientState = clients.get(ws);
       if (clientState?.dataInterval) {
         clearInterval(clientState.dataInterval);
+      }
+      
+      // End the diagnostic session if one was active
+      if (clientState?.diagnosticSessionId) {
+        try {
+          const endedSession = await storage.endDiagnosticSession(clientState.diagnosticSessionId);
+          console.log(`Ended diagnostic session with ID: ${clientState.diagnosticSessionId} due to client disconnect`);
+        } catch (error) {
+          console.error('Error ending diagnostic session during disconnect:', error);
+        }
       }
       
       clients.delete(ws);
