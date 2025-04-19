@@ -18,6 +18,7 @@ export default function Header({ currentPath }: HeaderProps) {
   const navItems: NavItem[] = [
     { path: '/', label: 'Dashboard', icon: 'ri-dashboard-line' },
     { path: '/diagnostics', label: 'Diagnostics', icon: 'ri-error-warning-line' },
+    { path: '/advanced-diagnostics', label: 'G2 Turbo', icon: 'ri-tools-line' },
     { path: '/history', label: 'History', icon: 'ri-history-line' },
     { path: '/settings', label: 'Settings', icon: 'ri-settings-line' },
     { path: '/report-issue', label: 'Report Issue', icon: 'ri-feedback-line' },

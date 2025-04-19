@@ -315,7 +315,7 @@ const AdvancedDiagnostics = () => {
       };
       
       // Execute the diagnostic operation
-      const result = await apiRequest("POST", "/api/advanced-diagnostics", diagnosticData);
+      const result: any = await apiRequest("POST", "/api/advanced-diagnostics", diagnosticData);
       
       // Update with the mock output result since we don't have real hardware
       const mockOutputResult = generateMockResult(data.moduleType, data.functionName, processedParams);

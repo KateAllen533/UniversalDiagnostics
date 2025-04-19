@@ -35,6 +35,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/diagnostics" component={Diagnostics} />
+        <Route path="/advanced-diagnostics" component={AdvancedDiagnostics} />
         <Route path="/history" component={History} />
         <Route path="/settings" component={Settings} />
         <Route path="/report-issue" component={ReportIssue} />
