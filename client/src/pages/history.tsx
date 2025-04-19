@@ -1,36 +1,35 @@
 import { useState } from 'react';
 import { useVehicleData } from '@/hooks/use-vehicle-data';
-import { VehicleData } from '@/lib/vehicleTypes';
+import { VehicleData } from '@shared/schema';
+import { useDiagnosticSessions } from '@/hooks/use-diagnostic-history';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function History() {
-  const { dataHistory, clearHistory } = useVehicleData();
+  const { dataHistory } = useVehicleData(); // Keep for backward compatibility
+  const { data: sessions = [], isLoading, isError } = useDiagnosticSessions();
   const [activeTab, setActiveTab] = useState('sessions');
   
-  const formatTimestamp = (timestamp: number) => {
+  const formatTimestamp = (timestamp: Date | number) => {
+    if (timestamp instanceof Date) {
+      return timestamp.toLocaleString();
+    }
     return new Date(timestamp).toLocaleString();
   };
 
   const handleClearHistory = () => {
     if (confirm('Are you sure you want to clear all diagnostic history? This cannot be undone.')) {
-      clearHistory();
+      // TODO: Implement database clear functionality
+      alert('This feature will be implemented soon.');
     }
   };
 
-  const exportSessionData = (session: VehicleData) => {
-    const dataStr = JSON.stringify(session, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `session-data-${new Date(session.timestamp).toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const exportSessionData = (sessionId: number) => {
+    // TODO: Implement export functionality with database data
+    alert(`Export for session ${sessionId} will be implemented soon.`);
   };
 
   return (
@@ -44,24 +43,17 @@ export default function History() {
           <Button 
             variant="outline" 
             onClick={handleClearHistory}
-            disabled={dataHistory.length === 0}
+            disabled={!sessions || sessions.length === 0}
           >
             <i className="ri-delete-bin-line mr-1.5"></i>
             Clear History
           </Button>
           <Button 
             onClick={() => {
-              const allData = JSON.stringify(dataHistory, null, 2);
-              const dataBlob = new Blob([allData], { type: 'application/json' });
-              const url = URL.createObjectURL(dataBlob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = `diagnostic-history-${new Date().toISOString().split('T')[0]}.json`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
+              // TODO: Implement export all functionality with database data
+              alert('Export all feature will be implemented soon.');
             }}
-            disabled={dataHistory.length === 0}
+            disabled={!sessions || sessions.length === 0}
           >
             <i className="ri-file-download-line mr-1.5"></i>
             Export All
@@ -87,24 +79,60 @@ export default function History() {
               <CardTitle>Diagnostic Sessions</CardTitle>
             </CardHeader>
             <CardContent>
-              {dataHistory.length === 0 ? (
+              {isLoading ? (
+                <div className="space-y-4">
+                  {Array(3).fill(0).map((_, i) => (
+                    <div key={i} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="w-1/2">
+                          <Skeleton className="h-5 w-32 mb-2" />
+                          <Skeleton className="h-4 w-40" />
+                        </div>
+                        <Skeleton className="h-9 w-24" />
+                      </div>
+                      <div className="mt-3 pt-3 border-t grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <Skeleton className="h-3 w-20 mb-2" />
+                          <Skeleton className="h-5 w-40" />
+                        </div>
+                        <div>
+                          <Skeleton className="h-3 w-20 mb-2" />
+                          <Skeleton className="h-5 w-40" />
+                        </div>
+                        <div>
+                          <Skeleton className="h-3 w-20 mb-2" />
+                          <Skeleton className="h-5 w-24" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : isError ? (
+                <div className="p-8 text-center">
+                  <i className="ri-error-warning-line text-4xl text-red-300 mb-2"></i>
+                  <p className="text-red-500">Error loading diagnostic sessions</p>
+                </div>
+              ) : !sessions || sessions.length === 0 ? (
                 <div className="p-8 text-center">
                   <i className="ri-history-line text-4xl text-gray-300 mb-2"></i>
                   <p className="text-gray-500">No diagnostic sessions found in history</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {dataHistory.map((session, index) => (
-                    <div key={index} className="border rounded-lg p-4">
+                  {sessions.map((session, index) => (
+                    <div key={session.id} className="border rounded-lg p-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-medium">Session #{dataHistory.length - index}</h3>
-                          <p className="text-sm text-gray-600">{formatTimestamp(session.timestamp)}</p>
+                          <h3 className="font-medium">Session #{sessions.length - index}</h3>
+                          <p className="text-sm text-gray-600">
+                            {formatTimestamp(session.startTime)}
+                            {session.endTime && ` - ${formatTimestamp(session.endTime)}`}
+                          </p>
                         </div>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          onClick={() => exportSessionData(session)}
+                          onClick={() => exportSessionData(session.id)}
                         >
                           <i className="ri-download-line mr-1"></i>
                           Export
@@ -112,30 +140,21 @@ export default function History() {
                       </div>
                       <div className="mt-3 pt-3 border-t grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <p className="text-xs text-gray-500 mb-1">Vehicle</p>
-                          <p className="text-sm font-medium">
-                            {session.vehicleInfo ? 
-                              `${session.vehicleInfo.year} ${session.vehicleInfo.make} ${session.vehicleInfo.model}` :
-                              'Not available'
-                            }
+                          <p className="text-xs text-gray-500 mb-1">Vehicle Type</p>
+                          <p className="text-sm font-medium capitalize">
+                            {session.vehicleType}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 mb-1">Engine Data</p>
-                          <p className="text-sm font-medium">
-                            {session.engineData ? 
-                              `RPM: ${session.engineData.rpm}, Speed: ${session.engineData.speed} km/h` : 
-                              'Not available'
-                            }
+                          <p className="text-xs text-gray-500 mb-1">Connection Method</p>
+                          <p className="text-sm font-medium uppercase">
+                            {session.connectionMethod}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 mb-1">Trouble Codes</p>
-                          <p className="text-sm font-medium">
-                            {session.troubleCodes && session.troubleCodes.length > 0 ?
-                              `${session.troubleCodes.length} code(s) found` :
-                              'No codes'
-                            }
+                          <p className="text-xs text-gray-500 mb-1">Protocol</p>
+                          <p className="text-sm font-medium uppercase">
+                            {session.protocol}
                           </p>
                         </div>
                       </div>
