@@ -78,6 +78,14 @@ export default function Settings() {
             <i className="ri-car-line mr-1.5"></i>
             Vehicle
           </TabsTrigger>
+          <TabsTrigger value="installation" className="flex items-center">
+            <i className="ri-git-branch-line mr-1.5"></i>
+            Installation
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center">
+            <i className="ri-brain-line mr-1.5"></i>
+            AI Analytics
+          </TabsTrigger>
           <TabsTrigger value="about" className="flex items-center">
             <i className="ri-information-line mr-1.5"></i>
             About
