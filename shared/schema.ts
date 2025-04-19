@@ -396,3 +396,186 @@ export enum UserEventType {
   ERROR = 'error',
   FEATURE_USAGE = 'feature-usage'
 }
+
+// Advanced Diagnostic Module Types
+export enum DiagnosticModuleType {
+  KEY_PROGRAMMING = 'key_programming',
+  EEPROM_OPERATIONS = 'eeprom_operations',
+  VEHICLE_DIAGNOSTICS = 'vehicle_diagnostics',
+  SYSTEM_ADAPTATION = 'system_adaptation',
+  ADVANCED_CONTROL = 'advanced_control',
+  SYSTEM_INFO = 'system_info'
+}
+
+// Key Programming Function Types
+export enum KeyProgrammingFunction {
+  PROGRAM_NEW_KEY = 'program_new_key',
+  ADD_SPARE_KEY = 'add_spare_key',
+  PROGRAM_REMOTE = 'program_remote',
+  CLONE_TRANSPONDER = 'clone_transponder',
+  READ_PIN_CODE = 'read_pin_code'
+}
+
+// EEPROM Operations Function Types
+export enum EepromOperationFunction {
+  READ_EEPROM = 'read_eeprom',
+  WRITE_EEPROM = 'write_eeprom',
+  IDENTIFY_EEPROM_CHIP = 'identify_eeprom_chip',
+  MODIFY_IMMO_DATA = 'modify_immo_data',
+  BACKUP_EEPROM = 'backup_eeprom'
+}
+
+// Vehicle Diagnostics Function Types
+export enum VehicleDiagnosticsFunction {
+  READ_DTCS = 'read_dtcs',
+  CLEAR_DTCS = 'clear_dtcs',
+  PERFORM_ACTIVE_TEST = 'perform_active_test',
+  STREAM_LIVE_DATA = 'stream_live_data',
+  RUN_MODULE_SCAN = 'run_module_scan'
+}
+
+// System Adaptation Function Types
+export enum SystemAdaptationFunction {
+  RESET_OIL_SERVICE = 'reset_oil_service',
+  EPB_MAINTENANCE_MODE = 'epb_maintenance_mode',
+  CALIBRATE_STEERING_ANGLE = 'calibrate_steering_angle',
+  INJECTOR_CODING = 'injector_coding',
+  BMS_RESET = 'bms_reset'
+}
+
+// Advanced Control Function Types
+export enum AdvancedControlFunction {
+  ENABLE_SGW_BYPASS = 'enable_sgw_bypass',
+  MODIFY_VIN = 'modify_vin',
+  ODOMETER_ADJUST = 'odometer_adjust',
+  AIRBAG_CRASH_RESET = 'airbag_crash_reset'
+}
+
+// System Information Function Types
+export enum SystemInfoFunction {
+  GET_SUPPORTED_PROTOCOLS = 'get_supported_protocols',
+  QUERY_IMMO_STATUS = 'query_immo_status',
+  LIST_SUPPORTED_VEHICLES = 'list_supported_vehicles'
+}
+
+// Generic Diagnostic Function Interface
+export interface DiagnosticFunction {
+  moduleType: DiagnosticModuleType;
+  functionName: string;
+  inputs: Record<string, any>;
+  output?: Record<string, any>;
+  successFlag?: boolean;
+  timestamp: Date;
+}
+
+// Key Programming Function Interfaces
+export interface KeyProgrammingParams {
+  vehicleMake?: string;
+  vehicleModel?: string;
+  keyType?: string;
+  immobilizerStatus?: string;
+  keyAlreadyProgrammed?: boolean;
+  remoteType?: string;
+  chipType?: string;
+  originalKeyData?: string;
+  ecuType?: string;
+  protocol?: string;
+}
+
+// EEPROM Operations Function Interfaces
+export interface EepromOperationParams {
+  chipType?: string;
+  pinoutMap?: string;
+  targetAddress?: string;
+  hexData?: string;
+  electricalSignature?: string;
+  eepromData?: string;
+  chipID?: string;
+}
+
+// Vehicle Diagnostics Function Interfaces
+export interface VehicleDiagnosticsParams {
+  vehicleMake?: string;
+  systemModule?: string;
+  moduleList?: string[];
+  componentID?: string;
+  sensorIDs?: string[];
+  vehicleVIN?: string;
+}
+
+// System Adaptation Function Interfaces
+export interface SystemAdaptationParams {
+  vehicleMake?: string;
+  vehicleModel?: string;
+  brakeModuleVersion?: string;
+  steeringSensor?: string;
+  injectorSerials?: string[];
+  ecuType?: string;
+  batteryID?: string;
+  resetCondition?: string;
+}
+
+// Advanced Control Function Interfaces
+export interface AdvancedControlParams {
+  vehicleMake?: string;
+  vehicleYear?: string;
+  ecuID?: string;
+  newVIN?: string;
+  clusterID?: string;
+  newValue?: number;
+  moduleID?: string;
+}
+
+// System Information Function Interfaces
+export interface SystemInfoParams {
+  vehicleMake?: string;
+  vehicleVIN?: string;
+  region?: string;
+}
+
+// Database table for advanced diagnostic operations
+export const advancedDiagnostics = pgTable("advanced_diagnostics", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  sessionId: integer("session_id").references(() => diagnosticSessions.id),
+  moduleType: varchar("module_type", { length: 50 }).notNull(),
+  functionName: varchar("function_name", { length: 100 }).notNull(),
+  inputParams: jsonb("input_params"),
+  outputResult: jsonb("output_result"),
+  successFlag: boolean("success_flag"),
+  executionTime: timestamp("execution_time").defaultNow().notNull(),
+  vehicleVin: varchar("vehicle_vin", { length: 20 }),
+  vehicleMake: varchar("vehicle_make", { length: 50 }),
+  vehicleModel: varchar("vehicle_model", { length: 50 }),
+  notes: text("notes"),
+});
+
+// Relations for advanced diagnostics
+export const advancedDiagnosticsRelations = relations(advancedDiagnostics, ({ one }) => ({
+  user: one(users, {
+    fields: [advancedDiagnostics.userId],
+    references: [users.id],
+  }),
+  session: one(diagnosticSessions, {
+    fields: [advancedDiagnostics.sessionId],
+    references: [diagnosticSessions.id],
+  }),
+}));
+
+// Insert schema for advanced diagnostics
+export const insertAdvancedDiagnosticSchema = createInsertSchema(advancedDiagnostics).pick({
+  userId: true,
+  sessionId: true,
+  moduleType: true,
+  functionName: true,
+  inputParams: true,
+  outputResult: true,
+  successFlag: true,
+  vehicleVin: true,
+  vehicleMake: true,
+  vehicleModel: true,
+  notes: true,
+});
+
+export type InsertAdvancedDiagnostic = z.infer<typeof insertAdvancedDiagnosticSchema>;
+export type AdvancedDiagnostic = typeof advancedDiagnostics.$inferSelect;

@@ -4,7 +4,8 @@ import { users, type User, type InsertUser,
          troubleCodes, type TroubleCodeRecord, type InsertTroubleCode,
          vehicleDataPoints, type VehicleDataPoint, type InsertVehicleDataPoint,
          issueReports, type IssueReport, type InsertIssueReport, IssueStatus,
-         userMetrics, type UserMetric, type InsertUserMetric, UserEventType } from "@shared/schema";
+         userMetrics, type UserMetric, type InsertUserMetric, UserEventType,
+         advancedDiagnostics, type AdvancedDiagnostic, type InsertAdvancedDiagnostic, DiagnosticModuleType } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -50,6 +51,15 @@ export interface IStorage {
   getUserMetricsBySessionId(sessionId: string): Promise<UserMetric[]>;
   getUserMetricsByEventType(eventType: UserEventType): Promise<UserMetric[]>;
   createUserMetric(metric: InsertUserMetric): Promise<UserMetric>;
+  
+  // Advanced diagnostics methods
+  getAdvancedDiagnostic(id: number): Promise<AdvancedDiagnostic | undefined>;
+  getAdvancedDiagnosticsByUser(userId: number): Promise<AdvancedDiagnostic[]>;
+  getAdvancedDiagnosticsBySession(sessionId: number): Promise<AdvancedDiagnostic[]>;
+  getAdvancedDiagnosticsByModule(moduleType: DiagnosticModuleType): Promise<AdvancedDiagnostic[]>;
+  getAdvancedDiagnosticsByFunction(functionName: string): Promise<AdvancedDiagnostic[]>;
+  createAdvancedDiagnostic(diagnostic: InsertAdvancedDiagnostic): Promise<AdvancedDiagnostic>;
+  updateAdvancedDiagnostic(id: number, updateData: Partial<InsertAdvancedDiagnostic>): Promise<AdvancedDiagnostic | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -236,6 +246,45 @@ export class DatabaseStorage implements IStorage {
       .values(metric)
       .returning();
     return newMetric;
+  }
+
+  // Advanced diagnostics methods
+  async getAdvancedDiagnostic(id: number): Promise<AdvancedDiagnostic | undefined> {
+    const [diagnostic] = await db.select().from(advancedDiagnostics).where(eq(advancedDiagnostics.id, id));
+    return diagnostic || undefined;
+  }
+
+  async getAdvancedDiagnosticsByUser(userId: number): Promise<AdvancedDiagnostic[]> {
+    return await db.select().from(advancedDiagnostics).where(eq(advancedDiagnostics.userId, userId));
+  }
+
+  async getAdvancedDiagnosticsBySession(sessionId: number): Promise<AdvancedDiagnostic[]> {
+    return await db.select().from(advancedDiagnostics).where(eq(advancedDiagnostics.sessionId, sessionId));
+  }
+
+  async getAdvancedDiagnosticsByModule(moduleType: DiagnosticModuleType): Promise<AdvancedDiagnostic[]> {
+    return await db.select().from(advancedDiagnostics).where(eq(advancedDiagnostics.moduleType, moduleType));
+  }
+
+  async getAdvancedDiagnosticsByFunction(functionName: string): Promise<AdvancedDiagnostic[]> {
+    return await db.select().from(advancedDiagnostics).where(eq(advancedDiagnostics.functionName, functionName));
+  }
+
+  async createAdvancedDiagnostic(diagnostic: InsertAdvancedDiagnostic): Promise<AdvancedDiagnostic> {
+    const [newDiagnostic] = await db
+      .insert(advancedDiagnostics)
+      .values(diagnostic)
+      .returning();
+    return newDiagnostic;
+  }
+
+  async updateAdvancedDiagnostic(id: number, updateData: Partial<InsertAdvancedDiagnostic>): Promise<AdvancedDiagnostic | undefined> {
+    const [updatedDiagnostic] = await db
+      .update(advancedDiagnostics)
+      .set(updateData)
+      .where(eq(advancedDiagnostics.id, id))
+      .returning();
+    return updatedDiagnostic || undefined;
   }
 }
 
