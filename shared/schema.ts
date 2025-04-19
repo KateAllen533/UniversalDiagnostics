@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, foreignKey, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, foreignKey, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -284,4 +284,115 @@ export interface ErrorPayload {
 // WebSocket server status payload
 export interface ServerStatusPayload {
   status: ServerStatus;
+}
+
+// Issue report table
+export const issueReports = pgTable("issue_reports", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description").notNull(),
+  category: varchar("category", { length: 50 }).notNull(),
+  severity: varchar("severity", { length: 20 }).notNull(), // low, medium, high, critical
+  status: varchar("status", { length: 20 }).default("open").notNull(), // open, in-progress, resolved, closed
+  deviceInfo: jsonb("device_info"),
+  appVersion: varchar("app_version", { length: 50 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  resolvedAt: timestamp("resolved_at"),
+});
+
+export const issueReportsRelations = relations(issueReports, ({ one }) => ({
+  user: one(users, {
+    fields: [issueReports.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertIssueReportSchema = createInsertSchema(issueReports).pick({
+  userId: true,
+  title: true,
+  description: true,
+  category: true,
+  severity: true,
+  deviceInfo: true,
+  appVersion: true,
+});
+
+export type InsertIssueReport = z.infer<typeof insertIssueReportSchema>;
+export type IssueReport = typeof issueReports.$inferSelect;
+
+// User metrics table
+export const userMetrics = pgTable("user_metrics", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  sessionId: text("session_id").notNull(), // client-side session ID
+  eventType: varchar("event_type", { length: 50 }).notNull(), // pageview, connection, diagnostics, etc.
+  eventData: jsonb("event_data"),
+  deviceInfo: jsonb("device_info"),
+  browserInfo: jsonb("browser_info"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export const userMetricsRelations = relations(userMetrics, ({ one }) => ({
+  user: one(users, {
+    fields: [userMetrics.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertUserMetricSchema = createInsertSchema(userMetrics).pick({
+  userId: true,
+  sessionId: true,
+  eventType: true,
+  eventData: true,
+  deviceInfo: true,
+  browserInfo: true,
+  ipAddress: true,
+  userAgent: true,
+});
+
+export type InsertUserMetric = z.infer<typeof insertUserMetricSchema>;
+export type UserMetric = typeof userMetrics.$inferSelect;
+
+// Issue category enum
+export enum IssueCategory {
+  CONNECTION = 'connection',
+  DIAGNOSTICS = 'diagnostics',
+  INTERFACE = 'interface',
+  PERFORMANCE = 'performance',
+  COMPATIBILITY = 'compatibility',
+  OTHER = 'other'
+}
+
+// Issue severity enum
+export enum IssueSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+// Issue status enum
+export enum IssueStatus {
+  OPEN = 'open',
+  IN_PROGRESS = 'in-progress',
+  RESOLVED = 'resolved',
+  CLOSED = 'closed'
+}
+
+// User event types enum
+export enum UserEventType {
+  PAGE_VIEW = 'pageview',
+  CONNECTION_ATTEMPT = 'connection-attempt',
+  CONNECTION_SUCCESS = 'connection-success',
+  CONNECTION_FAILURE = 'connection-failure',
+  DIAGNOSTICS_RUN = 'diagnostics-run',
+  TROUBLE_CODE_SCAN = 'trouble-code-scan',
+  EXPORT_DATA = 'export-data',
+  FORM_SUBMISSION = 'form-submission',
+  ERROR = 'error',
+  FEATURE_USAGE = 'feature-usage'
 }

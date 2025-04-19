@@ -34,6 +34,20 @@ export interface IStorage {
   // Vehicle data methods
   getVehicleDataPointsBySession(sessionId: number): Promise<VehicleDataPoint[]>;
   createVehicleDataPoint(dataPoint: InsertVehicleDataPoint): Promise<VehicleDataPoint>;
+  
+  // Issue report methods
+  getIssueReport(id: number): Promise<IssueReport | undefined>;
+  getIssueReportsByUser(userId: number): Promise<IssueReport[]>;
+  getIssueReportsByStatus(status: IssueStatus): Promise<IssueReport[]>;
+  createIssueReport(report: InsertIssueReport): Promise<IssueReport>;
+  updateIssueReport(id: number, updateData: Partial<InsertIssueReport>): Promise<IssueReport | undefined>;
+  updateIssueStatus(id: number, status: IssueStatus): Promise<IssueReport | undefined>;
+  
+  // User metrics methods
+  getUserMetricsByUser(userId: number): Promise<UserMetric[]>;
+  getUserMetricsBySessionId(sessionId: string): Promise<UserMetric[]>;
+  getUserMetricsByEventType(eventType: UserEventType): Promise<UserMetric[]>;
+  createUserMetric(metric: InsertUserMetric): Promise<UserMetric>;
 }
 
 export class DatabaseStorage implements IStorage {
