@@ -10,9 +10,11 @@ import Diagnostics from "@/pages/diagnostics";
 import History from "@/pages/history";
 import Settings from "@/pages/settings";
 import ReportIssue from "@/pages/report-issue";
+import AdvancedDiagnostics from "@/pages/advanced-diagnostics";
 import DisclaimerOverlay from "@/components/DisclaimerOverlay";
 import Header from "@/components/Header";
 import { trackPageView } from "./lib/metrics";
+import SetupDefaultUser from "@/components/setup-default-user";
 
 function Router() {
   const [location] = useLocation();
@@ -77,6 +79,7 @@ function App() {
           isVisible={!disclaimerAccepted} 
           onAccept={handleAcceptDisclaimer} 
         />
+        <SetupDefaultUser />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>

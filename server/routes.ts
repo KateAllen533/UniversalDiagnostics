@@ -22,7 +22,18 @@ import {
   InsertUserMetric,
   UserMetric,
   issueReports,
-  userMetrics
+  userMetrics,
+  InsertUser,
+  DiagnosticModuleType,
+  KeyProgrammingFunction,
+  EepromOperationFunction,
+  VehicleDiagnosticsFunction,
+  SystemAdaptationFunction,
+  AdvancedControlFunction,
+  SystemInfoFunction,
+  InsertAdvancedDiagnostic,
+  advancedDiagnostics,
+  AdvancedDiagnostic
 } from "../shared/schema";
 
 const MOCK_SERVER_RUNNING = true;
@@ -110,6 +121,157 @@ function generateMockVehicleData(vehicleType: string) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+  
+  // User API endpoints
+  app.get('/api/users/:id', async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = await storage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error('Error getting user:', error);
+      res.status(500).json({ error: 'Failed to get user' });
+    }
+  });
+  
+  app.post('/api/users', async (req: Request, res: Response) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Username and password are required' });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(409).json({ error: 'Username already exists' });
+      }
+      
+      const user = await storage.createUser({
+        username,
+        password // In a real app, you would hash this password
+      });
+      
+      res.status(201).json(user);
+    } catch (error) {
+      console.error('Error creating user:', error);
+      res.status(500).json({ error: 'Failed to create user' });
+    }
+  });
+  
+  // API endpoints for advanced diagnostics
+  app.get('/api/advanced-diagnostics', async (req: Request, res: Response) => {
+    try {
+      let diagnostics: AdvancedDiagnostic[];
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+      const sessionId = req.query.sessionId ? parseInt(req.query.sessionId as string) : undefined;
+      const moduleType = req.query.moduleType as DiagnosticModuleType | undefined;
+      const functionName = req.query.functionName as string | undefined;
+      
+      if (userId) {
+        diagnostics = await storage.getAdvancedDiagnosticsByUser(userId);
+      } else if (sessionId) {
+        diagnostics = await storage.getAdvancedDiagnosticsBySession(sessionId);
+      } else if (moduleType) {
+        diagnostics = await storage.getAdvancedDiagnosticsByModule(moduleType);
+      } else if (functionName) {
+        diagnostics = await storage.getAdvancedDiagnosticsByFunction(functionName);
+      } else {
+        // For simplicity, return recent diagnostics when no filter is provided
+        diagnostics = await db.select().from(advancedDiagnostics).orderBy(advancedDiagnostics.executionTime).limit(100);
+      }
+      
+      res.json(diagnostics);
+    } catch (error) {
+      console.error('Error getting advanced diagnostics:', error);
+      res.status(500).json({ error: 'Failed to get advanced diagnostics' });
+    }
+  });
+  
+  app.get('/api/advanced-diagnostics/:id', async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const diagnostic = await storage.getAdvancedDiagnostic(id);
+      
+      if (!diagnostic) {
+        return res.status(404).json({ error: 'Advanced diagnostic not found' });
+      }
+      
+      res.json(diagnostic);
+    } catch (error) {
+      console.error('Error getting advanced diagnostic:', error);
+      res.status(500).json({ error: 'Failed to get advanced diagnostic' });
+    }
+  });
+  
+  app.post('/api/advanced-diagnostics', async (req: Request, res: Response) => {
+    try {
+      const {
+        userId = 1, 
+        sessionId, 
+        moduleType, 
+        functionName, 
+        inputParams, 
+        outputResult, 
+        successFlag, 
+        vehicleVin, 
+        vehicleMake, 
+        vehicleModel, 
+        notes
+      } = req.body;
+      
+      if (!moduleType || !functionName) {
+        return res.status(400).json({ error: 'Module type and function name are required' });
+      }
+      
+      const diagnostic = await storage.createAdvancedDiagnostic({
+        userId,
+        sessionId,
+        moduleType,
+        functionName,
+        inputParams,
+        outputResult,
+        successFlag,
+        vehicleVin,
+        vehicleMake,
+        vehicleModel,
+        notes
+      });
+      
+      res.status(201).json(diagnostic);
+    } catch (error) {
+      console.error('Error creating advanced diagnostic:', error);
+      res.status(500).json({ error: 'Failed to create advanced diagnostic' });
+    }
+  });
+  
+  app.patch('/api/advanced-diagnostics/:id', async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { outputResult, successFlag, notes } = req.body;
+      
+      const updatedDiagnostic = await storage.updateAdvancedDiagnostic(id, {
+        outputResult,
+        successFlag,
+        notes
+      });
+      
+      if (!updatedDiagnostic) {
+        return res.status(404).json({ error: 'Advanced diagnostic not found' });
+      }
+      
+      res.json(updatedDiagnostic);
+    } catch (error) {
+      console.error('Error updating advanced diagnostic:', error);
+      res.status(500).json({ error: 'Failed to update advanced diagnostic' });
+    }
+  });
   
   // API endpoints for diagnostic sessions
   app.post('/api/vehicles', async (req: Request, res: Response) => {
