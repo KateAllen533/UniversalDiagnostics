@@ -1,0 +1,116 @@
+
+AutoProPAD_G2_Turbo_Functions:
+  MODULES:
+    KEY_PROGRAMMING:
+      - FUNCTION: Program_New_Key
+        INPUTS: [Vehicle_Make, Vehicle_Model, Key_Type, Immobilizer_Status]
+        OUTPUT: Success_Boolean
+
+      - FUNCTION: Add_Spare_Key
+        INPUTS: [Vehicle_Make, Vehicle_Model, Key_Already_Programmed]
+        OUTPUT: Success_Boolean
+
+      - FUNCTION: Program_Remote
+        INPUTS: [Remote_Type, Vehicle_Make, Vehicle_Model]
+        OUTPUT: Remote_Configured_Boolean
+
+      - FUNCTION: Clone_Transponder
+        INPUTS: [Chip_Type, Original_Key_Data]
+        OUTPUT: Cloned_Key
+
+      - FUNCTION: Read_PIN_Code
+        INPUTS: [ECU_Type, Protocol]
+        OUTPUT: PIN_Code
+
+    EEPROM_OPERATIONS:
+      - FUNCTION: Read_EEPROM
+        INPUTS: [Chip_Type, Pinout_Map]
+        OUTPUT: Hex_Data
+
+      - FUNCTION: Write_EEPROM
+        INPUTS: [Target_Address, Hex_Data]
+        OUTPUT: EEPROM_Write_Status
+
+      - FUNCTION: Identify_EEPROM_Chip
+        INPUTS: [Electrical_Signature]
+        OUTPUT: Chip_Identification
+
+      - FUNCTION: Modify_IMMO_Data
+        INPUTS: [EEPROM_Data]
+        OUTPUT: Modified_IMMO_Config
+
+      - FUNCTION: Backup_EEPROM
+        INPUTS: [Chip_ID]
+        OUTPUT: File_Path
+
+    VEHICLE_DIAGNOSTICS:
+      - FUNCTION: Read_DTCs
+        INPUTS: [Vehicle_Make, System_Module]
+        OUTPUT: Diagnostic_Codes
+
+      - FUNCTION: Clear_DTCs
+        INPUTS: [Module_List]
+        OUTPUT: Confirmation_Log
+
+      - FUNCTION: Perform_Active_Test
+        INPUTS: [Component_ID]
+        OUTPUT: Actuation_Response
+
+      - FUNCTION: Stream_Live_Data
+        INPUTS: [Sensor_IDs]
+        OUTPUT: RealTime_Values
+
+      - FUNCTION: Run_Module_Scan
+        INPUTS: [Vehicle_VIN]
+        OUTPUT: Detected_Modules_List
+
+    SYSTEM_ADAPTATION:
+      - FUNCTION: Reset_Oil_Service
+        INPUTS: [Vehicle_Make, Vehicle_Model]
+        OUTPUT: Status_Flag
+
+      - FUNCTION: EPB_Maintenance_Mode
+        INPUTS: [Brake_Module_Version]
+        OUTPUT: Activation_State
+
+      - FUNCTION: Calibrate_Steering_Angle
+        INPUTS: [Steering_Sensor]
+        OUTPUT: Calibration_Status
+
+      - FUNCTION: Injector_Coding
+        INPUTS: [Injector_Serials, ECU_Type]
+        OUTPUT: Injection_Map
+
+      - FUNCTION: BMS_Reset
+        INPUTS: [Battery_ID, Reset_Condition]
+        OUTPUT: Confirmation
+
+    ADVANCED_CONTROL:
+      - FUNCTION: Enable_SGW_Bypass
+        INPUTS: [Vehicle_Make, Vehicle_Year]
+        OUTPUT: Gateway_Status
+
+      - FUNCTION: Modify_VIN
+        INPUTS: [ECU_ID, New_VIN]
+        OUTPUT: VIN_Write_Status
+
+      - FUNCTION: Odometer_Adjust
+        INPUTS: [Cluster_ID, New_Value]
+        OUTPUT: Update_Status
+
+      - FUNCTION: Airbag_Crash_Reset
+        INPUTS: [Module_ID]
+        OUTPUT: Reset_Flag
+
+    SYSTEM_INFO:
+      - FUNCTION: Get_Supported_Protocols
+        INPUTS: [Vehicle_Make]
+        OUTPUT: Protocol_List
+
+      - FUNCTION: Query_Immo_Status
+        INPUTS: [Vehicle_VIN]
+        OUTPUT: Immobilizer_State
+
+      - FUNCTION: List_Supported_Vehicles
+        INPUTS: [Region]
+        OUTPUT: Compatibility_List

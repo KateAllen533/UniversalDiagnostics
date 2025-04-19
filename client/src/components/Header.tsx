@@ -20,6 +20,7 @@ export default function Header({ currentPath }: HeaderProps) {
     { path: '/diagnostics', label: 'Diagnostics', icon: 'ri-error-warning-line' },
     { path: '/history', label: 'History', icon: 'ri-history-line' },
     { path: '/settings', label: 'Settings', icon: 'ri-settings-line' },
+    { path: '/report-issue', label: 'Report Issue', icon: 'ri-feedback-line' },
   ];
 
   const connectionText = connectionInfo ? 

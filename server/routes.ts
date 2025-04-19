@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
 import { WebSocketServer, WebSocket } from "ws";
 import {
   MessageType,
@@ -13,7 +14,15 @@ import {
   InsertDiagnosticSession,
   InsertVehicleDataPoint,
   VehicleData,
-  TroubleCode
+  TroubleCode,
+  IssueStatus,
+  UserEventType,
+  InsertIssueReport,
+  IssueReport,
+  InsertUserMetric,
+  UserMetric,
+  issueReports,
+  userMetrics
 } from "../shared/schema";
 
 const MOCK_SERVER_RUNNING = true;

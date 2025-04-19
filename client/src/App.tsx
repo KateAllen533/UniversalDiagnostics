@@ -9,11 +9,23 @@ import Home from "@/pages/home";
 import Diagnostics from "@/pages/diagnostics";
 import History from "@/pages/history";
 import Settings from "@/pages/settings";
+import ReportIssue from "@/pages/report-issue";
 import DisclaimerOverlay from "@/components/DisclaimerOverlay";
 import Header from "@/components/Header";
+import { trackPageView } from "./lib/metrics";
 
 function Router() {
   const [location] = useLocation();
+  
+  // Track page views when location changes
+  useEffect(() => {
+    // Get page name from path
+    const path = location || '/';
+    const pageName = path === '/' ? 'home' : path.substring(1);
+    
+    // Track the page view
+    trackPageView(pageName);
+  }, [location]);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -23,6 +35,7 @@ function Router() {
         <Route path="/diagnostics" component={Diagnostics} />
         <Route path="/history" component={History} />
         <Route path="/settings" component={Settings} />
+        <Route path="/report-issue" component={ReportIssue} />
         <Route component={NotFound} />
       </Switch>
       <footer className="bg-white border-t border-gray-200 py-4 mt-auto">
