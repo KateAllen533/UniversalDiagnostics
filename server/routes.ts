@@ -264,6 +264,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Issue report routes
+  app.get('/api/issues', async (req: Request, res: Response) => {
+    try {
+      const status = req.query.status as IssueStatus | undefined;
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+      
+      let issues: IssueReport[];
+      if (status) {
+        issues = await storage.getIssueReportsByStatus(status);
+      } else if (userId) {
+        issues = await storage.getIssueReportsByUser(userId);
+      } else {
+        // For simplicity, return all issues when no filter is provided
+        // In a real app, you might want to add pagination
+        issues = await db.select().from(issueReports).orderBy(issueReports.createdAt);
+      }
+      
+      res.json(issues);
+    } catch (error) {
+      console.error('Error getting issue reports:', error);
+      res.status(500).json({ error: 'Failed to get issue reports' });
+    }
+  });
+  
+  app.get('/api/issues/:id', async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const issue = await storage.getIssueReport(id);
+      
+      if (!issue) {
+        return res.status(404).json({ error: 'Issue report not found' });
+      }
+      
+      res.json(issue);
+    } catch (error) {
+      console.error('Error getting issue report:', error);
+      res.status(500).json({ error: 'Failed to get issue report' });
+    }
+  });
+  
+  app.post('/api/issues', async (req: Request, res: Response) => {
+    try {
+      // Default to user ID 1 if not authenticated
+      const userId = req.body.userId || 1;
+      
+      // Get browser and device info from request if provided
+      const userAgent = req.headers['user-agent'];
+      const ipAddress = req.ip || req.socket.remoteAddress;
+      
+      // Construct the report object
+      const report: InsertIssueReport = {
+        userId,
+        title: req.body.title,
+        description: req.body.description,
+        category: req.body.category,
+        severity: req.body.severity,
+        deviceInfo: req.body.deviceInfo || { userAgent, ipAddress },
+        appVersion: req.body.appVersion || process.env.npm_package_version || '1.0.0'
+      };
+      
+      const newIssue = await storage.createIssueReport(report);
+      
+      // Log user metric for issue report
+      await storage.createUserMetric({
+        userId,
+        sessionId: req.body.sessionId || 'unknown',
+        eventType: UserEventType.FORM_SUBMISSION,
+        eventData: { issueId: newIssue.id, formType: 'issue-report' },
+        deviceInfo: req.body.deviceInfo,
+        browserInfo: { userAgent },
+        ipAddress: ipAddress || undefined,
+        userAgent: userAgent || undefined
+      });
+      
+      res.status(201).json(newIssue);
+    } catch (error) {
+      console.error('Error creating issue report:', error);
+      res.status(500).json({ error: 'Failed to create issue report' });
+    }
+  });
+  
+  app.patch('/api/issues/:id/status', async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (!Object.values(IssueStatus).includes(status)) {
+        return res.status(400).json({ error: 'Invalid status value' });
+      }
+      
+      const updatedIssue = await storage.updateIssueStatus(id, status);
+      
+      if (!updatedIssue) {
+        return res.status(404).json({ error: 'Issue report not found' });
+      }
+      
+      res.json(updatedIssue);
+    } catch (error) {
+      console.error('Error updating issue status:', error);
+      res.status(500).json({ error: 'Failed to update issue status' });
+    }
+  });
+  
+  // User metrics routes
+  app.post('/api/metrics', async (req: Request, res: Response) => {
+    try {
+      // Default to user ID 1 if not authenticated
+      const userId = req.body.userId || 1;
+      
+      // Get browser and device info from request
+      const userAgent = req.headers['user-agent'];
+      const ipAddress = req.ip || req.socket.remoteAddress;
+      
+      const metric: InsertUserMetric = {
+        userId,
+        sessionId: req.body.sessionId || 'unknown',
+        eventType: req.body.eventType,
+        eventData: req.body.eventData || {},
+        deviceInfo: req.body.deviceInfo || {},
+        browserInfo: req.body.browserInfo || { userAgent },
+        ipAddress: ipAddress || undefined,
+        userAgent: userAgent || undefined
+      };
+      
+      const newMetric = await storage.createUserMetric(metric);
+      res.status(201).json(newMetric);
+    } catch (error) {
+      console.error('Error creating user metric:', error);
+      res.status(500).json({ error: 'Failed to create user metric' });
+    }
+  });
+  
+  app.get('/api/metrics', async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+      const sessionId = req.query.sessionId as string | undefined;
+      const eventType = req.query.eventType as UserEventType | undefined;
+      
+      let metrics: UserMetric[];
+      if (userId) {
+        metrics = await storage.getUserMetricsByUser(userId);
+      } else if (sessionId) {
+        metrics = await storage.getUserMetricsBySessionId(sessionId);
+      } else if (eventType) {
+        metrics = await storage.getUserMetricsByEventType(eventType);
+      } else {
+        // For simplicity, return recent metrics when no filter is provided
+        // In a real app, you might want to add pagination
+        metrics = await db.select().from(userMetrics).orderBy(userMetrics.timestamp).limit(100);
+      }
+      
+      res.json(metrics);
+    } catch (error) {
+      console.error('Error getting user metrics:', error);
+      res.status(500).json({ error: 'Failed to get user metrics' });
+    }
+  });
+  
   // Create WebSocket server
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   

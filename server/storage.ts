@@ -2,7 +2,9 @@ import { users, type User, type InsertUser,
          vehicles, type Vehicle, type InsertVehicle,
          diagnosticSessions, type DiagnosticSession, type InsertDiagnosticSession,
          troubleCodes, type TroubleCodeRecord, type InsertTroubleCode,
-         vehicleDataPoints, type VehicleDataPoint, type InsertVehicleDataPoint } from "@shared/schema";
+         vehicleDataPoints, type VehicleDataPoint, type InsertVehicleDataPoint,
+         issueReports, type IssueReport, type InsertIssueReport, IssueStatus,
+         userMetrics, type UserMetric, type InsertUserMetric, UserEventType } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -169,6 +171,71 @@ export class DatabaseStorage implements IStorage {
       .values(dataPoint)
       .returning();
     return newDataPoint;
+  }
+
+  // Issue report methods
+  async getIssueReport(id: number): Promise<IssueReport | undefined> {
+    const [report] = await db.select().from(issueReports).where(eq(issueReports.id, id));
+    return report || undefined;
+  }
+
+  async getIssueReportsByUser(userId: number): Promise<IssueReport[]> {
+    return await db.select().from(issueReports).where(eq(issueReports.userId, userId));
+  }
+
+  async getIssueReportsByStatus(status: IssueStatus): Promise<IssueReport[]> {
+    return await db.select().from(issueReports).where(eq(issueReports.status, status));
+  }
+
+  async createIssueReport(report: InsertIssueReport): Promise<IssueReport> {
+    const [newReport] = await db
+      .insert(issueReports)
+      .values(report)
+      .returning();
+    return newReport;
+  }
+
+  async updateIssueReport(id: number, updateData: Partial<InsertIssueReport>): Promise<IssueReport | undefined> {
+    const [updatedReport] = await db
+      .update(issueReports)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(issueReports.id, id))
+      .returning();
+    return updatedReport || undefined;
+  }
+
+  async updateIssueStatus(id: number, status: IssueStatus): Promise<IssueReport | undefined> {
+    const [updatedReport] = await db
+      .update(issueReports)
+      .set({ 
+        status: status, 
+        updatedAt: new Date(),
+        resolvedAt: (status === IssueStatus.RESOLVED || status === IssueStatus.CLOSED) ? new Date() : undefined
+      })
+      .where(eq(issueReports.id, id))
+      .returning();
+    return updatedReport || undefined;
+  }
+
+  // User metrics methods
+  async getUserMetricsByUser(userId: number): Promise<UserMetric[]> {
+    return await db.select().from(userMetrics).where(eq(userMetrics.userId, userId));
+  }
+
+  async getUserMetricsBySessionId(sessionId: string): Promise<UserMetric[]> {
+    return await db.select().from(userMetrics).where(eq(userMetrics.sessionId, sessionId));
+  }
+
+  async getUserMetricsByEventType(eventType: UserEventType): Promise<UserMetric[]> {
+    return await db.select().from(userMetrics).where(eq(userMetrics.eventType, eventType));
+  }
+
+  async createUserMetric(metric: InsertUserMetric): Promise<UserMetric> {
+    const [newMetric] = await db
+      .insert(userMetrics)
+      .values(metric)
+      .returning();
+    return newMetric;
   }
 }
 
