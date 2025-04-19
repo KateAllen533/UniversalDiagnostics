@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { WebSocketServer, WebSocket } from "ws";
@@ -9,6 +9,11 @@ import {
   ConnectRequestPayload,
   ConnectResponsePayload,
   DataUpdatePayload,
+  VehicleType,
+  InsertDiagnosticSession,
+  InsertVehicleDataPoint,
+  VehicleData,
+  TroubleCode
 } from "../shared/schema";
 
 const MOCK_SERVER_RUNNING = true;
@@ -97,6 +102,168 @@ function generateMockVehicleData(vehicleType: string) {
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   
+  // API endpoints for diagnostic sessions
+  app.post('/api/vehicles', async (req: Request, res: Response) => {
+    try {
+      const { make, model, year, vin, engineType, userId = 1 } = req.body;
+      
+      if (!make || !model || !year) {
+        return res.status(400).json({ error: 'Make, model, and year are required' });
+      }
+      
+      const vehicle = await storage.createVehicle({
+        make,
+        model,
+        year,
+        vin,
+        engineType,
+        userId
+      });
+      
+      res.status(201).json(vehicle);
+    } catch (error) {
+      console.error('Error creating vehicle:', error);
+      res.status(500).json({ error: 'Failed to create vehicle' });
+    }
+  });
+  
+  app.get('/api/vehicles', async (req: Request, res: Response) => {
+    try {
+      // Default to user ID 1 for demo
+      const userId = parseInt(req.query.userId as string) || 1;
+      const vehicles = await storage.getVehiclesByUser(userId);
+      res.json(vehicles);
+    } catch (error) {
+      console.error('Error getting vehicles:', error);
+      res.status(500).json({ error: 'Failed to get vehicles' });
+    }
+  });
+  
+  app.post('/api/sessions', async (req: Request, res: Response) => {
+    try {
+      const { vehicleId, connectionMethod, protocol, vehicleType, userId = 1 } = req.body;
+      
+      if (!vehicleId || !connectionMethod || !protocol || !vehicleType) {
+        return res.status(400).json({ error: 'Vehicle ID, connection method, protocol, and vehicle type are required' });
+      }
+      
+      const session = await storage.createDiagnosticSession({
+        vehicleId,
+        userId,
+        connectionMethod,
+        protocol,
+        vehicleType
+      });
+      
+      res.status(201).json(session);
+    } catch (error) {
+      console.error('Error creating diagnostic session:', error);
+      res.status(500).json({ error: 'Failed to create diagnostic session' });
+    }
+  });
+  
+  app.get('/api/sessions', async (req: Request, res: Response) => {
+    try {
+      let sessions;
+      // Default to user ID 1 for demo
+      const userId = parseInt(req.query.userId as string) || 1;
+      
+      if (req.query.vehicleId) {
+        const vehicleId = parseInt(req.query.vehicleId as string);
+        sessions = await storage.getDiagnosticSessionsByVehicle(vehicleId);
+      } else {
+        sessions = await storage.getDiagnosticSessionsByUser(userId);
+      }
+      
+      res.json(sessions);
+    } catch (error) {
+      console.error('Error getting diagnostic sessions:', error);
+      res.status(500).json({ error: 'Failed to get diagnostic sessions' });
+    }
+  });
+  
+  app.patch('/api/sessions/:id/end', async (req: Request, res: Response) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      const endedSession = await storage.endDiagnosticSession(sessionId);
+      
+      if (!endedSession) {
+        return res.status(404).json({ error: 'Diagnostic session not found' });
+      }
+      
+      res.json(endedSession);
+    } catch (error) {
+      console.error('Error ending diagnostic session:', error);
+      res.status(500).json({ error: 'Failed to end diagnostic session' });
+    }
+  });
+  
+  app.post('/api/sessions/:id/data', async (req: Request, res: Response) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      const { engineData, batteryStatus, sensorData, milStatus, readiness } = req.body;
+      
+      const dataPoint = await storage.createVehicleDataPoint({
+        sessionId,
+        engineData,
+        batteryStatus,
+        sensorData,
+        milStatus,
+        readiness
+      });
+      
+      res.status(201).json(dataPoint);
+    } catch (error) {
+      console.error('Error creating vehicle data point:', error);
+      res.status(500).json({ error: 'Failed to create vehicle data point' });
+    }
+  });
+  
+  app.get('/api/sessions/:id/data', async (req: Request, res: Response) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      const dataPoints = await storage.getVehicleDataPointsBySession(sessionId);
+      res.json(dataPoints);
+    } catch (error) {
+      console.error('Error getting vehicle data points:', error);
+      res.status(500).json({ error: 'Failed to get vehicle data points' });
+    }
+  });
+  
+  app.post('/api/sessions/:id/codes', async (req: Request, res: Response) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      const { code, description, severity } = req.body;
+      
+      if (!code || !severity) {
+        return res.status(400).json({ error: 'Code and severity are required' });
+      }
+      
+      const troubleCode = await storage.createTroubleCode({
+        sessionId,
+        code,
+        description,
+        severity
+      });
+      
+      res.status(201).json(troubleCode);
+    } catch (error) {
+      console.error('Error creating trouble code:', error);
+      res.status(500).json({ error: 'Failed to create trouble code' });
+    }
+  });
+  
+  app.get('/api/sessions/:id/codes', async (req: Request, res: Response) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      const troubleCodes = await storage.getTroubleCodesBySession(sessionId);
+      res.json(troubleCodes);
+    } catch (error) {
+      console.error('Error getting trouble codes:', error);
+      res.status(500).json({ error: 'Failed to get trouble codes' });
+    }
+  });
+  
   // Create WebSocket server
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   
@@ -104,6 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     isConnected: boolean;
     settings?: ConnectionSettings;
     dataInterval?: NodeJS.Timeout;
+    diagnosticSessionId?: number;
   }>();
   
   wss.on('connection', (ws) => {
@@ -153,12 +321,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Store settings if connected successfully
               if (success) {
+                // Create a diagnostic session in the database
+                let activeDiagnosticSessionId: number | null = null;
+                
+                // For demo purposes, we'll use a default vehicle ID of 1
+                // In a real application, this would be selected by the user
+                const createSession = async () => {
+                  try {
+                    // First, check if we have any vehicles in the database
+                    const vehicles = await storage.getVehiclesByUser(1);
+                    let vehicleId = 1;
+                    
+                    // If no vehicles exist, create a default one
+                    if (vehicles.length === 0) {
+                      const defaultVehicle = await storage.createVehicle({
+                        userId: 1,
+                        make: settings.vehicleType === VehicleType.EV ? 'Tesla' : 'Toyota',
+                        model: settings.vehicleType === VehicleType.EV ? 'Model 3' : 'Corolla',
+                        year: '2022',
+                        vin: settings.vehicleType === VehicleType.EV ? '5YJ3E1EAXNF123456' : 'JTDEPRAE1LJ123456',
+                        engineType: settings.vehicleType === VehicleType.EV ? 'Electric' : '1.8L I4'
+                      });
+                      vehicleId = defaultVehicle.id;
+                    } else {
+                      vehicleId = vehicles[0].id;
+                    }
+                    
+                    const session = await storage.createDiagnosticSession({
+                      userId: 1,
+                      vehicleId,
+                      connectionMethod: settings.connectionMethod,
+                      protocol: settings.protocol,
+                      vehicleType: settings.vehicleType
+                    });
+                    
+                    activeDiagnosticSessionId = session.id;
+                    console.log(`Created diagnostic session with ID: ${activeDiagnosticSessionId}`);
+                  } catch (error) {
+                    console.error('Error creating diagnostic session:', error);
+                  }
+                };
+                
+                createSession();
+                
                 clients.set(ws, {
                   isConnected: true,
                   settings,
-                  dataInterval: setInterval(() => {
+                  dataInterval: setInterval(async () => {
                     if (ws.readyState === WebSocket.OPEN) {
                       const vehicleData = generateMockVehicleData(settings.vehicleType);
+                      
+                      // Store the data in the database if we have an active session
+                      if (activeDiagnosticSessionId !== null) {
+                        try {
+                          // Save the vehicle data point
+                          await storage.createVehicleDataPoint({
+                            sessionId: activeDiagnosticSessionId,
+                            engineData: vehicleData.engineData,
+                            batteryStatus: vehicleData.batteryStatus,
+                            sensorData: vehicleData.sensorData,
+                            milStatus: vehicleData.milStatus,
+                            readiness: vehicleData.readiness
+                          });
+                          
+                          // If we have trouble codes, save them too
+                          if (vehicleData.troubleCodes && vehicleData.troubleCodes.length > 0) {
+                            for (const code of vehicleData.troubleCodes) {
+                              await storage.createTroubleCode({
+                                sessionId: activeDiagnosticSessionId,
+                                code: code.code,
+                                description: code.description,
+                                severity: code.severity
+                              });
+                            }
+                          }
+                        } catch (error) {
+                          console.error('Error saving vehicle data:', error);
+                        }
+                      }
                       
                       const dataUpdateMessage: WebSocketMessage = {
                         type: MessageType.DATA_UPDATE,

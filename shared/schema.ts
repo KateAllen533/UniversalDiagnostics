@@ -1,11 +1,13 @@
-import { pgTable, text, serial, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, foreignKey, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -15,6 +17,133 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Vehicle profiles table
+export const vehicles = pgTable("vehicles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  make: text("make").notNull(),
+  model: text("model").notNull(),
+  year: text("year").notNull(),
+  vin: text("vin"),
+  engineType: text("engine_type"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const vehiclesRelations = relations(vehicles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [vehicles.userId],
+    references: [users.id],
+  }),
+  diagnosticSessions: many(diagnosticSessions),
+}));
+
+export const insertVehicleSchema = createInsertSchema(vehicles).pick({
+  userId: true,
+  make: true,
+  model: true,
+  year: true,
+  vin: true,
+  engineType: true,
+});
+
+export type InsertVehicle = z.infer<typeof insertVehicleSchema>;
+export type Vehicle = typeof vehicles.$inferSelect;
+
+// Diagnostic sessions table
+export const diagnosticSessions = pgTable("diagnostic_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  vehicleId: integer("vehicle_id").references(() => vehicles.id),
+  startTime: timestamp("start_time").defaultNow().notNull(),
+  endTime: timestamp("end_time"),
+  connectionMethod: text("connection_method").notNull(),
+  protocol: text("protocol").notNull(),
+  vehicleType: text("vehicle_type").notNull(),
+});
+
+export const diagnosticSessionsRelations = relations(diagnosticSessions, ({ one, many }) => ({
+  user: one(users, {
+    fields: [diagnosticSessions.userId],
+    references: [users.id],
+  }),
+  vehicle: one(vehicles, {
+    fields: [diagnosticSessions.vehicleId],
+    references: [vehicles.id],
+  }),
+  troubleCodes: many(troubleCodes),
+  vehicleDataPoints: many(vehicleDataPoints),
+}));
+
+export const insertDiagnosticSessionSchema = createInsertSchema(diagnosticSessions).pick({
+  userId: true,
+  vehicleId: true,
+  connectionMethod: true,
+  protocol: true,
+  vehicleType: true,
+});
+
+export type InsertDiagnosticSession = z.infer<typeof insertDiagnosticSessionSchema>;
+export type DiagnosticSession = typeof diagnosticSessions.$inferSelect;
+
+// Trouble codes table
+export const troubleCodes = pgTable("trouble_codes", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").references(() => diagnosticSessions.id),
+  code: text("code").notNull(),
+  description: text("description"),
+  severity: text("severity").notNull(), // low, medium, high
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export const troubleCodesRelations = relations(troubleCodes, ({ one }) => ({
+  session: one(diagnosticSessions, {
+    fields: [troubleCodes.sessionId],
+    references: [diagnosticSessions.id],
+  }),
+}));
+
+export const insertTroubleCodeSchema = createInsertSchema(troubleCodes).pick({
+  sessionId: true,
+  code: true,
+  description: true,
+  severity: true,
+});
+
+export type InsertTroubleCode = z.infer<typeof insertTroubleCodeSchema>;
+export type TroubleCodeRecord = typeof troubleCodes.$inferSelect;
+
+// Vehicle data points table
+export const vehicleDataPoints = pgTable("vehicle_data_points", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").references(() => diagnosticSessions.id),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  engineData: jsonb("engine_data"),
+  batteryStatus: jsonb("battery_status"),
+  sensorData: jsonb("sensor_data"),
+  milStatus: text("mil_status"),
+  readiness: text("readiness"),
+});
+
+export const vehicleDataPointsRelations = relations(vehicleDataPoints, ({ one }) => ({
+  session: one(diagnosticSessions, {
+    fields: [vehicleDataPoints.sessionId],
+    references: [diagnosticSessions.id],
+  }),
+}));
+
+export const insertVehicleDataPointSchema = createInsertSchema(vehicleDataPoints).pick({
+  sessionId: true,
+  engineData: true,
+  batteryStatus: true,
+  sensorData: true,
+  milStatus: true,
+  readiness: true,
+});
+
+export type InsertVehicleDataPoint = z.infer<typeof insertVehicleDataPointSchema>;
+export type VehicleDataPoint = typeof vehicleDataPoints.$inferSelect;
 
 // Connection Types
 export enum ConnectionMethod {
