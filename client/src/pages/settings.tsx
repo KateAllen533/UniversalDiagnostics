@@ -5,7 +5,15 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Select, 
+  SelectContent, 
+  SelectGroup,
+  SelectItem, 
+  SelectLabel,
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { useConnection } from '@/hooks/use-connection';
 import { VehicleType, ConnectionMethod, ProtocolType } from '@/lib/vehicleTypes';
 
@@ -427,7 +435,7 @@ export default function Settings() {
                     # In server/index.ts, update the host binding<br />
                     const PORT = process.env.PORT || 3000;<br />
                     app.listen(PORT, '0.0.0.0', () =&gt; &#123;<br />
-                    {'  '}console.log(`Server running at http://0.0.0.0:${PORT}`);<br />
+                    {'  '}console.log(`Server running at http://0.0.0.0:${'${PORT}'}`);<br />
                     &#125;);
                   </div>
                   <p className="text-sm text-gray-600 mt-2">
