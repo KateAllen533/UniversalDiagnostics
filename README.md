@@ -149,6 +149,10 @@ To make the application accessible from other devices on your network:
 2. Start the server as normal
 3. Access the application from other devices using your computer's IP address
 
+## Copyright & Ownership
+
+This is a prototype developed by Global Technology Consulting LLC. Currently under NovarisAI testing. All rights reserved.
+
 ## License
 
 This software is provided for educational and diagnostic purposes only. The user assumes all responsibility for its use and any consequences thereof. No warranty is expressed or implied.

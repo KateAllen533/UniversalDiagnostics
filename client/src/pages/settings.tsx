@@ -655,6 +655,14 @@ export default function Settings() {
                 </div>
                 
                 <div className="border-t pt-4">
+                  <h3 className="font-medium mb-2">Copyright & Ownership</h3>
+                  <p className="text-sm text-gray-600">
+                    This is a prototype developed by Global Technology Consulting LLC.
+                    Currently under NovarisAI testing. All rights reserved.
+                  </p>
+                </div>
+                
+                <div className="border-t pt-4">
                   <h3 className="font-medium mb-2">Disclaimer</h3>
                   <p className="text-sm text-gray-600">
                     This tool is provided as-is without warranty of any kind. Users are responsible for 

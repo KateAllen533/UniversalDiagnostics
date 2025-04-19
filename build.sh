@@ -2,6 +2,8 @@
 
 echo "Universal Vehicle Diagnostics - Build & Installation Script"
 echo "=========================================================="
+echo "Copyright © Global Technology Consulting LLC"
+echo "Prototype under NovarisAI testing. All rights reserved."
 echo ""
 
 # Check if npm is installed
