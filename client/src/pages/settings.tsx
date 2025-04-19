@@ -382,31 +382,49 @@ export default function Settings() {
                 <div className="space-y-2">
                   <h4 className="text-sm font-semibold">1. Clone the Repository</h4>
                   <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
-                    git clone https://github.com/yourusername/universal-vehicle-diagnostics.git
+                    git clone https://github.com/KateAllen533/UniversalDiagnostics.git
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">2. Install Dependencies</h4>
+                  <h4 className="text-sm font-semibold">2. Automated Installation</h4>
+                  <p className="text-sm text-gray-600 mb-2">
+                    We provide convenient build scripts that automate the installation process:
+                  </p>
                   <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
-                    cd universal-vehicle-diagnostics<br />
-                    npm install
+                    # On Linux/macOS<br />
+                    cd UniversalDiagnostics<br />
+                    chmod +x build.sh<br />
+                    ./build.sh<br /><br />
+                    # On Windows<br />
+                    cd UniversalDiagnostics<br />
+                    build.bat
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">3. Setup Database</h4>
+                  <h4 className="text-sm font-semibold">3. Manual Installation</h4>
+                  <p className="text-sm text-gray-600 mb-2">
+                    If you prefer to install manually:
+                  </p>
                   <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
+                    cd UniversalDiagnostics<br />
+                    npm install<br /><br />
                     # Setup a PostgreSQL database<br />
-                    # Update .env file with your database credentials<br />
-                    npm run db:push
+                    # Create .env file with your database credentials<br />
+                    npm run db:push<br /><br />
+                    # Start the development server<br />
+                    npm run dev
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold">4. Run the Application</h4>
+                  <h4 className="text-sm font-semibold">4. Production Deployment</h4>
                   <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
-                    npm run dev
+                    # Build for production<br />
+                    npm run build<br /><br />
+                    # Start production server<br />
+                    npm start
                   </div>
                 </div>
               </div>
@@ -623,15 +641,15 @@ export default function Settings() {
                   <div className="space-y-2">
                     <div className="flex items-center">
                       <i className="ri-github-line text-lg mr-2"></i>
-                      <a href="#" className="text-primary">GitHub Repository</a>
+                      <a href="https://github.com/KateAllen533/UniversalDiagnostics" target="_blank" rel="noopener noreferrer" className="text-primary">GitHub Repository</a>
                     </div>
                     <div className="flex items-center">
                       <i className="ri-question-line text-lg mr-2"></i>
-                      <a href="#" className="text-primary">Documentation</a>
+                      <a href="https://github.com/KateAllen533/UniversalDiagnostics/wiki" target="_blank" rel="noopener noreferrer" className="text-primary">Documentation</a>
                     </div>
                     <div className="flex items-center">
                       <i className="ri-bug-line text-lg mr-2"></i>
-                      <a href="#" className="text-primary">Report an Issue</a>
+                      <a href="https://github.com/KateAllen533/UniversalDiagnostics/issues" target="_blank" rel="noopener noreferrer" className="text-primary">Report an Issue</a>
                     </div>
                   </div>
                 </div>
