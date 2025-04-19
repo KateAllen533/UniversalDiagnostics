@@ -354,6 +354,227 @@ export default function Settings() {
           </Card>
         </TabsContent>
         
+        <TabsContent value="installation">
+          <Card>
+            <CardHeader>
+              <CardTitle>Installation & Deployment</CardTitle>
+              <CardDescription>
+                Deploy and run the application on your own server or local machine
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="font-medium">GitHub Installation</h3>
+                <div className="bg-gray-50 p-4 rounded-md border-l-4 border-blue-500">
+                  <p className="text-sm mb-2">
+                    You can deploy Universal Vehicle Diagnostics from our GitHub repository to run it on your own server or local machine.
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">1. Clone the Repository</h4>
+                  <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
+                    git clone https://github.com/yourusername/universal-vehicle-diagnostics.git
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">2. Install Dependencies</h4>
+                  <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
+                    cd universal-vehicle-diagnostics<br />
+                    npm install
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">3. Setup Database</h4>
+                  <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
+                    # Setup a PostgreSQL database<br />
+                    # Update .env file with your database credentials<br />
+                    npm run db:push
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">4. Run the Application</h4>
+                  <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
+                    npm run dev
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="font-medium">Custom Deployment</h3>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">Deploying to a Custom Domain</h4>
+                  <p className="text-sm text-gray-600">
+                    To deploy to a custom domain instead of replit.dev:
+                  </p>
+                  <ol className="text-sm space-y-2 list-decimal pl-5">
+                    <li>Build the application with <code className="bg-gray-100 px-1 rounded">npm run build</code></li>
+                    <li>The built files will be in the <code className="bg-gray-100 px-1 rounded">dist</code> folder</li>
+                    <li>Configure your web server (Nginx, Apache, etc.) to serve these static files</li>
+                    <li>Ensure you set up a proxy for the API endpoints to the Express server</li>
+                  </ol>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">Running as a Local Server</h4>
+                  <p className="text-sm text-gray-600">
+                    To run the application as a local server accessible on your network:
+                  </p>
+                  <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
+                    # In server/index.ts, update the host binding<br />
+                    const PORT = process.env.PORT || 3000;<br />
+                    app.listen(PORT, '0.0.0.0', () =&gt; &#123;<br />
+                    {'  '}console.log(`Server running at http://0.0.0.0:${PORT}`);<br />
+                    &#125;);
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">
+                    This will make the server accessible from other devices on your local network using your computer's IP address.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Advanced Analytics with Ollama</CardTitle>
+              <CardDescription>
+                Integrate with local Ollama AI models to analyze diagnostic data
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-md border border-blue-100">
+                  <h3 className="font-medium text-blue-800 flex items-center">
+                    <i className="ri-brain-line mr-2"></i>
+                    AI-Powered Diagnostics
+                  </h3>
+                  <p className="text-sm text-gray-700 mt-2">
+                    Universal Vehicle Diagnostics can integrate with local Ollama AI models to provide advanced analytics and insights for your diagnostic data.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h3 className="font-medium">Ollama Configuration</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="ollamaEndpoint">Ollama API Endpoint</Label>
+                  <Input 
+                    id="ollamaEndpoint" 
+                    placeholder="http://localhost:11434/api/generate" 
+                    defaultValue="http://localhost:11434/api/generate"
+                  />
+                  <p className="text-xs text-gray-500">
+                    The default endpoint for a local Ollama instance is http://localhost:11434/api/generate
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ollamaModel">Ollama Model</Label>
+                  <Select defaultValue="llama2:latest">
+                    <SelectTrigger id="ollamaModel">
+                      <SelectValue placeholder="Select an Ollama model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Quantized Models (INT4)</SelectLabel>
+                        <SelectItem value="llama2:4b-q4_K_M">llama2:4b-q4_K_M</SelectItem>
+                        <SelectItem value="mistral:7b-q4_K_M">mistral:7b-q4_K_M</SelectItem>
+                        <SelectItem value="codellama:7b-q4_K_M">codellama:7b-q4_K_M</SelectItem>
+                      </SelectGroup>
+                      <SelectGroup>
+                        <SelectLabel>Quantized Models (INT8)</SelectLabel>
+                        <SelectItem value="llama2:7b-q8_0">llama2:7b-q8_0</SelectItem>
+                        <SelectItem value="mistral:7b-q8_0">mistral:7b-q8_0</SelectItem>
+                        <SelectItem value="llama2:13b-q8_0">llama2:13b-q8_0</SelectItem>
+                      </SelectGroup>
+                      <SelectGroup>
+                        <SelectLabel>Standard Models</SelectLabel>
+                        <SelectItem value="llama2:latest">llama2:latest</SelectItem>
+                        <SelectItem value="mistral:latest">mistral:latest</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Quantized models (INT4/INT8) require less memory but may have slightly reduced accuracy
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="font-medium">Analytics Settings</h3>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="autoAnalyze">Auto-analyze diagnostic sessions</Label>
+                    <p className="text-sm text-gray-500">Automatically analyze diagnostic data after each session</p>
+                  </div>
+                  <Switch id="autoAnalyze" defaultChecked={false} />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="saveAnalytics">Save AI analysis results</Label>
+                    <p className="text-sm text-gray-500">Store the results of AI analysis for future reference</p>
+                  </div>
+                  <Switch id="saveAnalytics" defaultChecked={true} />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="analyticsDept">Analysis Depth</Label>
+                  <Select defaultValue="standard">
+                    <SelectTrigger id="analyticsDept">
+                      <SelectValue placeholder="Select analysis depth" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="basic">Basic (Fast)</SelectItem>
+                      <SelectItem value="standard">Standard</SelectItem>
+                      <SelectItem value="detailed">Detailed (Slower)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="font-medium">Installation Instructions</h3>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">1. Install Ollama</h4>
+                  <p className="text-sm text-gray-600">
+                    Install Ollama on your local machine from <a href="https://ollama.ai" target="_blank" rel="noopener noreferrer" className="text-primary">ollama.ai</a>
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">2. Pull Required Models</h4>
+                  <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
+                    # Install a quantized INT4 model (smaller file size)<br />
+                    ollama pull llama2:7b-q4_K_M<br /><br />
+                    # Or install a quantized INT8 model (better quality)<br />
+                    ollama pull llama2:7b-q8_0
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold">3. Start Ollama Server</h4>
+                  <div className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm font-mono">
+                    ollama serve
+                  </div>
+                </div>
+              </div>
+              
+              <Button className="mt-4">
+                <i className="ri-brain-line mr-1.5"></i>
+                Save Analytics Settings
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
         <TabsContent value="about">
           <Card>
             <CardHeader>
