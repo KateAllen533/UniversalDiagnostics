@@ -26,9 +26,13 @@ export async function setupVite(app: Express, server: Server) {
     allowedHosts: true,
   };
 
+  // Get the root directory from vite config
+  const clientRoot = path.resolve(import.meta.dirname, "..", "client");
+
   const vite = await createViteServer({
     ...viteConfig,
-    configFile: false,
+    root: clientRoot,
+    configFile: path.resolve(import.meta.dirname, "..", "vite.config.ts"),
     customLogger: {
       ...viteLogger,
       error: (msg, options) => {

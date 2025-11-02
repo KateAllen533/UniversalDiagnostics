@@ -122,6 +122,37 @@ Universal Vehicle Diagnostics can integrate with local Ollama AI models to provi
    ```
 4. Configure the AI Analytics settings in the application
 
+## GitHub Pages Deployment
+
+This application includes automated GitHub Pages deployment. The static web UI will be automatically deployed to GitHub Pages when you push to the `main` branch.
+
+### Automatic Deployment
+
+1. Enable GitHub Pages in your repository settings:
+   - Go to Settings → Pages
+   - Under "Source", select "GitHub Actions"
+
+2. Push to the `main` branch or manually trigger the workflow:
+   - The workflow will automatically build and deploy the static client to GitHub Pages
+   - The site will be available at `https://[username].github.io/UniversalDiagnostics/`
+
+3. The workflow (`deploy-gh-pages.yml`) will:
+   - Build the client application with the correct base path
+   - Deploy the static files to GitHub Pages
+
+### Manual Build for GitHub Pages
+
+To build the static files locally for GitHub Pages:
+
+```bash
+# Build with GitHub Pages base path
+VITE_BASE_PATH=/UniversalDiagnostics/ npm run build:gh-pages
+
+# The built files will be in the `dist` folder
+```
+
+**Note:** If your repository name is different from `UniversalDiagnostics`, update the `VITE_BASE_PATH` value in `.github/workflows/deploy-gh-pages.yml` to match your repository name (e.g., `/YourRepoName/`).
+
 ## Custom Deployment
 
 To deploy to a custom domain instead of replit.dev:
