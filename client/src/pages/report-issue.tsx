@@ -89,7 +89,7 @@ export default function ReportIssuePage() {
     },
   });
   
-  // Submit handler
+  // Submit handler - submits to both Netlify Forms and API (if available)
   const onSubmit = async (values: IssueReportFormValues) => {
     setIsSubmitting(true);
     
@@ -97,24 +97,47 @@ export default function ReportIssuePage() {
       // Add device info to the form values
       values.deviceInfo = deviceInfo;
       
-      const response = await apiRequest(
-        'POST',
-        '/api/issues',
-        {
-          ...values,
-          sessionId,
-        }
-      );
+      // Prepare form data for Netlify
+      const formData = new FormData();
+      formData.append('form-name', 'report-issue');
+      formData.append('title', values.title);
+      formData.append('category', values.category || '');
+      formData.append('severity', values.severity || '');
+      formData.append('description', values.description);
+      formData.append('deviceInfo', JSON.stringify(deviceInfo));
+      formData.append('sessionId', sessionId);
       
-      if (response.ok) {
-        const data = await response.json();
+      // Submit to Netlify Forms
+      const netlifyResponse = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData as any).toString(),
+      });
+      
+      if (netlifyResponse.ok) {
+        // Try to also submit to API if available (for local development)
+        try {
+          const response = await apiRequest(
+            'POST',
+            '/api/issues',
+            {
+              ...values,
+              sessionId,
+            }
+          );
+          // API submission is optional - don't fail if it doesn't work
+        } catch (apiError) {
+          console.log('API submission failed (expected on Netlify):', apiError);
+        }
+        
         toast({
           title: 'Issue Reported',
-          description: 'Thank you for your feedback. Your issue has been reported.',
+          description: 'Thank you for your feedback. Your issue has been reported successfully.',
         });
+        form.reset();
         navigate('/');
       } else {
-        throw new Error('Failed to submit issue report');
+        throw new Error('Failed to submit issue report to Netlify');
       }
     } catch (error) {
       console.error('Error submitting issue report:', error);
@@ -155,7 +178,23 @@ export default function ReportIssuePage() {
           <Separator className="mb-6" />
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form 
+              name="report-issue" 
+              method="POST" 
+              data-netlify="true" 
+              netlify-honeypot="bot-field"
+              onSubmit={form.handleSubmit(onSubmit)} 
+              className="space-y-6"
+            >
+              {/* Hidden Netlify form fields */}
+              <input type="hidden" name="form-name" value="report-issue" />
+              <input type="hidden" name="bot-field" />
+              
+              {/* Hidden fields for Netlify form submission */}
+              <input type="hidden" name="title" value={form.watch('title') || ''} />
+              <input type="hidden" name="category" value={form.watch('category') || ''} />
+              <input type="hidden" name="severity" value={form.watch('severity') || ''} />
+              <input type="hidden" name="description" value={form.watch('description') || ''} />
               <FormField
                 control={form.control}
                 name="title"

@@ -12,5 +12,15 @@
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    <!-- Netlify Forms - Hidden form for Netlify to detect -->
+    <form name="report-issue" netlify netlify-honeypot="bot-field" hidden>
+      <input type="text" name="title" />
+      <input type="text" name="category" />
+      <input type="text" name="severity" />
+      <textarea name="description"></textarea>
+      <input type="text" name="deviceInfo" />
+      <input type="text" name="sessionId" />
+      <input type="text" name="bot-field" />
+    </form>
   </body>
 </html>
