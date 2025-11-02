@@ -1,0 +1,32 @@
+[build]
+  # Build command for Netlify
+  command = "npm run build:netlify"
+  # Publish directory (where the static files are output)
+  publish = "dist"
+  
+  # Environment variables
+  [build.environment]
+    NODE_VERSION = "20"
+
+# SPA redirect rules - all routes redirect to index.html for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+

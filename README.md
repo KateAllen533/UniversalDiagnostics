@@ -153,6 +153,60 @@ VITE_BASE_PATH=/UniversalDiagnostics/ npm run build:gh-pages
 
 **Note:** If your repository name is different from `UniversalDiagnostics`, update the `VITE_BASE_PATH` value in `.github/workflows/deploy-gh-pages.yml` to match your repository name (e.g., `/YourRepoName/`).
 
+## Netlify Deployment
+
+This application is configured for easy deployment to Netlify as a static site.
+
+### Deploy to Netlify
+
+1. **Sign up/Login to Netlify**:
+   - Go to [netlify.com](https://www.netlify.com)
+   - Sign up or log in with your GitHub account
+
+2. **Connect your GitHub repository**:
+   - Click "Add new site" → "Import an existing project"
+   - Choose "GitHub" and authorize Netlify
+   - Select your `UniversalDiagnostics` repository
+
+3. **Configure build settings** (Netlify should auto-detect these from `netlify.toml`):
+   - **Build command**: `npm run build:netlify`
+   - **Publish directory**: `dist`
+   - **Base directory**: (leave empty or set to root)
+
+4. **Deploy**:
+   - Click "Deploy site"
+   - Netlify will automatically build and deploy your site
+   - Your site will be available at `https://[your-site-name].netlify.app`
+
+### Continuous Deployment
+
+- Every push to the `main` branch will automatically trigger a new deployment
+- Netlify will build and deploy your site automatically
+- You'll get a unique URL for your site (you can customize the domain name)
+
+### Custom Domain
+
+To use a custom domain:
+1. Go to Site settings → Domain management
+2. Add your custom domain
+3. Follow Netlify's DNS configuration instructions
+
+### Manual Build for Netlify
+
+To build the static files locally:
+
+```bash
+npm run build:netlify
+
+# The built files will be in the `dist` folder
+```
+
+The `netlify.toml` file contains all the necessary configuration:
+- Build command
+- Publish directory
+- SPA redirect rules (for client-side routing)
+- Caching headers for static assets
+
 ## Custom Deployment
 
 To deploy to a custom domain instead of replit.dev:

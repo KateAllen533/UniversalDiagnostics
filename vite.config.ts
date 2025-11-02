@@ -7,8 +7,10 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 export default defineConfig(async ({ mode }) => {
   // For GitHub Pages, use the repository name as base path
   // This will be set via VITE_BASE_PATH environment variable
+  // For Netlify, use root path
   const base = process.env.VITE_BASE_PATH || '/';
   const isGhPages = process.env.VITE_BASE_PATH !== undefined;
+  const isNetlify = process.env.NETLIFY === 'true' || process.env.CONTEXT === 'production';
   
   const cartographerPlugin = 
     process.env.NODE_ENV !== "production" &&
@@ -36,6 +38,8 @@ export default defineConfig(async ({ mode }) => {
     root: path.resolve(import.meta.dirname, "client"),
     build: {
       outDir: isGhPages 
+        ? path.resolve(import.meta.dirname, "dist")
+        : isNetlify
         ? path.resolve(import.meta.dirname, "dist")
         : path.resolve(import.meta.dirname, "dist/public"),
       emptyOutDir: true,
