@@ -7,6 +7,8 @@
   # Environment variables
   [build.environment]
     NODE_VERSION = "20"
+    NETLIFY = "true"
+    NODE_ENV = "production"
 
 # SPA redirect rules - all routes redirect to index.html for client-side routing
 [[redirects]]

@@ -10,7 +10,11 @@ export default defineConfig(async ({ mode }) => {
   // For Netlify, use root path
   const base = process.env.VITE_BASE_PATH || '/';
   const isGhPages = process.env.VITE_BASE_PATH !== undefined;
-  const isNetlify = process.env.NETLIFY === 'true' || process.env.CONTEXT === 'production';
+  // Netlify sets NETLIFY=true and CONTEXT environment variables
+  const isNetlify = process.env.NETLIFY === 'true' || 
+                    process.env.CONTEXT === 'production' || 
+                    process.env.CONTEXT === 'deploy-preview' ||
+                    process.env.CONTEXT === 'branch-deploy';
   
   const cartographerPlugin = 
     process.env.NODE_ENV !== "production" &&
@@ -19,6 +23,14 @@ export default defineConfig(async ({ mode }) => {
           (await import("@replit/vite-plugin-cartographer")).cartographer(),
         ]
       : [];
+  
+  // Determine output directory
+  let outDir = path.resolve(import.meta.dirname, "dist/public");
+  if (isGhPages) {
+    outDir = path.resolve(import.meta.dirname, "dist");
+  } else if (isNetlify) {
+    outDir = path.resolve(import.meta.dirname, "dist");
+  }
   
   return {
     base,
@@ -37,11 +49,7 @@ export default defineConfig(async ({ mode }) => {
     },
     root: path.resolve(import.meta.dirname, "client"),
     build: {
-      outDir: isGhPages 
-        ? path.resolve(import.meta.dirname, "dist")
-        : isNetlify
-        ? path.resolve(import.meta.dirname, "dist")
-        : path.resolve(import.meta.dirname, "dist/public"),
+      outDir,
       emptyOutDir: true,
     },
   };

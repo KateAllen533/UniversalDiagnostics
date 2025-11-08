@@ -2,7 +2,7 @@
 
 A comprehensive web application for universal vehicle diagnostics that supports both traditional combustion engine vehicles and electric vehicles through various connection methods (USB, USB-C, Bluetooth).
 
-🌐 **Live Demo**: [https://universal-diagnotistics-tool.netlify.app/](https://universal-diagnotistics-tool.netlify.app/)
+🌐 **Live Demo**: [https://ai-vehicle-diagnostic.netlify.app/](https://ai-vehicle-diagnostic.netlify.app/)
 
 ## Features
 
@@ -144,7 +144,7 @@ This application includes automated GitHub Pages deployment. The static web UI w
 
  
 
-- 🌐 [Live Demo on Netlify](https://universal-diagnotistics-tool.netlify.app/)
+- 🌐 [Live Demo on Netlify](https://ai-vehicle-diagnostic.netlify.app/)
 - [GitHub Repository](https://github.com/KateAllen533/UniversalDiagnostics)
 - [Documentation](https://github.com/KateAllen533/UniversalDiagnostics/wiki)
 - [Report an Issue](https://github.com/KateAllen533/UniversalDiagnostics/issues)
