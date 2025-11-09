@@ -432,13 +432,21 @@ const AdvancedDiagnostics = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">
-        Advanced Diagnostics (AutoProPAD G2 Turbo)
-      </h1>
+    <div className="page-container">
+      <div className="mb-8">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+            <i className="ri-tools-line text-primary text-2xl"></i>
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Advanced Diagnostics</h1>
+            <p className="text-gray-600 dark:text-gray-400">AutoProPAD G2 Turbo professional functions</p>
+          </div>
+        </div>
+      </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="col-span-1">
+        <Card className="col-span-1 shadow-md border-gray-200 dark:border-gray-800">
           <CardHeader>
             <CardTitle>Diagnostic Function Selection</CardTitle>
             <CardDescription>
@@ -588,7 +596,7 @@ const AdvancedDiagnostics = () => {
           </CardContent>
         </Card>
         
-        <Card className="col-span-1">
+        <Card className="col-span-1 shadow-md border-gray-200 dark:border-gray-800">
           <CardHeader>
             <CardTitle>Execution Results</CardTitle>
             <CardDescription>

@@ -16,50 +16,75 @@ export default function Dashboard() {
   const isConnected = connectionStatus === 'connected';
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="page-container">
       <ConnectionSetup />
       
-      <h2 className="text-xl font-semibold text-dark-blue mb-4">Dashboard</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <VehicleInfoCard 
-          vehicleInfo={vehicleData?.vehicleInfo} 
-          isConnected={isConnected} 
-        />
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+            <i className="ri-dashboard-line text-primary text-2xl"></i>
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h2>
+            <p className="text-gray-600 dark:text-gray-400">Real-time vehicle diagnostics and monitoring</p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="card-hover">
+          <VehicleInfoCard 
+            vehicleInfo={vehicleData?.vehicleInfo} 
+            isConnected={isConnected} 
+          />
+        </div>
         
-        <DiagnosticSummaryCard 
-          troubleCodes={vehicleData?.troubleCodes} 
-          milStatus={vehicleData?.milStatus} 
-          readiness={vehicleData?.readiness} 
-          isConnected={isConnected} 
-        />
+        <div className="card-hover">
+          <DiagnosticSummaryCard 
+            troubleCodes={vehicleData?.troubleCodes} 
+            milStatus={vehicleData?.milStatus} 
+            readiness={vehicleData?.readiness} 
+            isConnected={isConnected} 
+          />
+        </div>
         
-        <BatteryStatusCard 
-          batteryStatus={vehicleData?.batteryStatus} 
-          isConnected={isConnected} 
-        />
+        <div className="card-hover">
+          <BatteryStatusCard 
+            batteryStatus={vehicleData?.batteryStatus} 
+            isConnected={isConnected} 
+          />
+        </div>
         
-        <EngineDataCard 
-          engineData={vehicleData?.engineData} 
-          isConnected={isConnected} 
-        />
+        <div className="card-hover">
+          <EngineDataCard 
+            engineData={vehicleData?.engineData} 
+            isConnected={isConnected} 
+          />
+        </div>
         
-        <SensorDataCard 
-          sensorData={vehicleData?.sensorData} 
-          isConnected={isConnected} 
-        />
+        <div className="card-hover">
+          <SensorDataCard 
+            sensorData={vehicleData?.sensorData} 
+            isConnected={isConnected} 
+          />
+        </div>
         
-        <DataMonitoringCard 
+        <div className="card-hover">
+          <DataMonitoringCard 
+            vehicleData={vehicleData} 
+            isConnected={isConnected} 
+            dataHistory={dataHistory}
+          />
+        </div>
+      </div>
+
+      <div className="card-hover">
+        <PerformanceMetrics 
           vehicleData={vehicleData} 
           isConnected={isConnected} 
           dataHistory={dataHistory}
         />
       </div>
-
-      <PerformanceMetrics 
-        vehicleData={vehicleData} 
-        isConnected={isConnected} 
-        dataHistory={dataHistory}
-      />
     </div>
   );
 }

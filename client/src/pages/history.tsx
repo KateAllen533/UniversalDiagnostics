@@ -33,48 +33,56 @@ export default function History() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-dark-blue">Diagnostic History</h1>
-          <p className="text-gray-600">View and analyze past diagnostic sessions</p>
-        </div>
-        <div className="mt-2 md:mt-0 space-x-2">
-          <Button 
-            variant="outline" 
-            onClick={handleClearHistory}
-            disabled={!sessions || sessions.length === 0}
-          >
-            <i className="ri-delete-bin-line mr-1.5"></i>
-            Clear History
-          </Button>
-          <Button 
-            onClick={() => {
-              // TODO: Implement export all functionality with database data
-              alert('Export all feature will be implemented soon.');
-            }}
-            disabled={!sessions || sessions.length === 0}
-          >
-            <i className="ri-file-download-line mr-1.5"></i>
-            Export All
-          </Button>
+    <div className="page-container">
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+              <i className="ri-history-line text-primary text-2xl"></i>
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Diagnostic History</h1>
+              <p className="text-gray-600 dark:text-gray-400">View and analyze past diagnostic sessions</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleClearHistory}
+              disabled={!sessions || sessions.length === 0}
+              className="shadow-sm hover:shadow-md transition-shadow"
+            >
+              <i className="ri-delete-bin-line mr-1.5"></i>
+              Clear
+            </Button>
+            <Button 
+              onClick={() => {
+                alert('Export all feature will be implemented soon.');
+              }}
+              disabled={!sessions || sessions.length === 0}
+              className="shadow-sm hover:shadow-md transition-shadow"
+            >
+              <i className="ri-file-download-line mr-1.5"></i>
+              Export All
+            </Button>
+          </div>
         </div>
       </div>
       
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="sessions" className="flex items-center">
-            <i className="ri-history-line mr-1.5"></i>
+        <TabsList className="mb-6 bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 p-1">
+          <TabsTrigger value="sessions" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-history-line text-lg"></i>
             Diagnostic Sessions
           </TabsTrigger>
-          <TabsTrigger value="dtcs" className="flex items-center">
-            <i className="ri-error-warning-line mr-1.5"></i>
+          <TabsTrigger value="dtcs" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-error-warning-line text-lg"></i>
             Trouble Code History
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="sessions">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Diagnostic Sessions</CardTitle>
             </CardHeader>
@@ -120,7 +128,7 @@ export default function History() {
               ) : (
                 <div className="space-y-4">
                   {sessions.map((session, index) => (
-                    <div key={session.id} className="border rounded-lg p-4">
+                    <div key={session.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-primary/50 transition-colors bg-white dark:bg-gray-900">
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="font-medium">Session #{sessions.length - index}</h3>
@@ -167,7 +175,7 @@ export default function History() {
         </TabsContent>
         
         <TabsContent value="dtcs">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Trouble Code History</CardTitle>
             </CardHeader>
@@ -182,7 +190,7 @@ export default function History() {
                   {dataHistory
                     .filter(session => session.troubleCodes && session.troubleCodes.length > 0)
                     .map((session, index) => (
-                      <div key={index} className="border rounded-lg p-4">
+                      <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-primary/50 transition-colors bg-white dark:bg-gray-900">
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-medium">

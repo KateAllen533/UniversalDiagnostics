@@ -69,39 +69,49 @@ export default function Settings() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-dark-blue mb-6">Settings</h1>
+    <div className="page-container">
+      <div className="mb-8">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+            <i className="ri-settings-line text-primary text-2xl"></i>
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+            <p className="text-gray-600 dark:text-gray-400">Configure your diagnostic tool preferences</p>
+          </div>
+        </div>
+      </div>
       
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="connection" className="flex items-center">
-            <i className="ri-plug-line mr-1.5"></i>
+        <TabsList className="mb-6 bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 p-1 flex-wrap h-auto">
+          <TabsTrigger value="connection" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-plug-line text-lg"></i>
             Connection
           </TabsTrigger>
-          <TabsTrigger value="data" className="flex items-center">
-            <i className="ri-database-2-line mr-1.5"></i>
+          <TabsTrigger value="data" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-database-2-line text-lg"></i>
             Data & Storage
           </TabsTrigger>
-          <TabsTrigger value="vehicle" className="flex items-center">
-            <i className="ri-car-line mr-1.5"></i>
+          <TabsTrigger value="vehicle" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-car-line text-lg"></i>
             Vehicle
           </TabsTrigger>
-          <TabsTrigger value="installation" className="flex items-center">
-            <i className="ri-git-branch-line mr-1.5"></i>
+          <TabsTrigger value="installation" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-git-branch-line text-lg"></i>
             Installation
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center">
-            <i className="ri-brain-line mr-1.5"></i>
+          <TabsTrigger value="analytics" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-brain-line text-lg"></i>
             AI Analytics
           </TabsTrigger>
-          <TabsTrigger value="about" className="flex items-center">
-            <i className="ri-information-line mr-1.5"></i>
+          <TabsTrigger value="about" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-information-line text-lg"></i>
             About
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="connection">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Connection Settings</CardTitle>
               <CardDescription>
@@ -217,7 +227,7 @@ export default function Settings() {
         </TabsContent>
         
         <TabsContent value="data">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Data & Storage Settings</CardTitle>
               <CardDescription>
@@ -284,7 +294,7 @@ export default function Settings() {
         </TabsContent>
         
         <TabsContent value="vehicle">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Vehicle Settings</CardTitle>
               <CardDescription>
@@ -363,7 +373,7 @@ export default function Settings() {
         </TabsContent>
         
         <TabsContent value="installation">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Installation & Deployment</CardTitle>
               <CardDescription>
@@ -466,7 +476,7 @@ export default function Settings() {
         </TabsContent>
         
         <TabsContent value="analytics">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>Advanced Analytics with Ollama</CardTitle>
               <CardDescription>
@@ -602,7 +612,7 @@ export default function Settings() {
         </TabsContent>
         
         <TabsContent value="about">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle>About Universal Vehicle Diagnostics</CardTitle>
               <CardDescription>
