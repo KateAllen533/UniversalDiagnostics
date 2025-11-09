@@ -50,42 +50,49 @@ export default function Diagnostics() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="page-container">
       <ConnectionSetup />
       
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-dark-blue">Diagnostics</h1>
-          <p className="text-gray-600">Analyze and troubleshoot vehicle issues</p>
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/10 dark:bg-primary/20 p-2 rounded-lg">
+              <i className="ri-error-warning-line text-primary text-2xl"></i>
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Diagnostics</h1>
+              <p className="text-gray-600 dark:text-gray-400">Analyze and troubleshoot vehicle issues</p>
+            </div>
+          </div>
+          <Button 
+            onClick={downloadDiagnosticReport}
+            disabled={!isConnected || !vehicleData}
+            className="shadow-sm hover:shadow-md transition-shadow"
+          >
+            <i className="ri-file-download-line mr-1.5"></i>
+            Export Report
+          </Button>
         </div>
-        <Button 
-          onClick={downloadDiagnosticReport}
-          disabled={!isConnected || !vehicleData}
-          className="mt-2 md:mt-0"
-        >
-          <i className="ri-file-download-line mr-1.5"></i>
-          Export Diagnostic Report
-        </Button>
       </div>
       
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="trouble-codes" className="flex items-center">
-            <i className="ri-error-warning-line mr-1.5"></i>
+        <TabsList className="mb-6 bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 p-1">
+          <TabsTrigger value="trouble-codes" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-error-warning-line text-lg"></i>
             Trouble Codes
           </TabsTrigger>
-          <TabsTrigger value="sensor-data" className="flex items-center">
-            <i className="ri-dashboard-3-line mr-1.5"></i>
+          <TabsTrigger value="sensor-data" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-dashboard-3-line text-lg"></i>
             Sensor Data
           </TabsTrigger>
-          <TabsTrigger value="readiness" className="flex items-center">
-            <i className="ri-checkbox-circle-line mr-1.5"></i>
+          <TabsTrigger value="readiness" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+            <i className="ri-checkbox-circle-line text-lg"></i>
             Readiness Monitors
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="trouble-codes">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Diagnostic Trouble Codes (DTCs)</span>
@@ -116,7 +123,7 @@ export default function Diagnostics() {
               ) : (
                 <div className="space-y-4">
                   {troubleCodes.map((code, index) => (
-                    <div key={index} className="border rounded-lg p-4">
+                    <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-primary/50 transition-colors bg-white dark:bg-gray-900">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center">
                           <i className={`${severityInfo[code.severity].icon} ${severityInfo[code.severity].color} text-lg mr-2`}></i>
@@ -152,7 +159,7 @@ export default function Diagnostics() {
         </TabsContent>
         
         <TabsContent value="sensor-data">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Real-time Sensor Data</span>
@@ -172,28 +179,28 @@ export default function Diagnostics() {
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/80 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
                     <p className="text-sm text-gray-500 mb-1">Engine RPM</p>
                     <p className="text-xl font-semibold">{vehicleData?.engineData?.rpm?.toFixed(0) || '--'}</p>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-500 mb-1">Vehicle Speed</p>
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/80 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Vehicle Speed</p>
                     <p className="text-xl font-semibold">{vehicleData?.engineData?.speed ? `${vehicleData.engineData.speed.toFixed(0)} km/h` : '--'}</p>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-500 mb-1">Coolant Temperature</p>
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/80 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Coolant Temperature</p>
                     <p className="text-xl font-semibold">{vehicleData?.engineData?.coolantTemp ? `${vehicleData.engineData.coolantTemp.toFixed(0)} °C` : '--'}</p>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-500 mb-1">Battery Voltage</p>
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/80 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Battery Voltage</p>
                     <p className="text-xl font-semibold">{vehicleData?.batteryStatus?.voltage ? `${vehicleData.batteryStatus.voltage.toFixed(1)} V` : '--'}</p>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-500 mb-1">Battery State of Charge</p>
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/80 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Battery State of Charge</p>
                     <p className="text-xl font-semibold">{vehicleData?.batteryStatus?.stateOfCharge ? `${vehicleData.batteryStatus.stateOfCharge.toFixed(0)}%` : '--'}</p>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-500 mb-1">Throttle Position</p>
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/80 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Throttle Position</p>
                     <p className="text-xl font-semibold">{vehicleData?.sensorData?.throttle ? `${vehicleData.sensorData.throttle.toFixed(0)}%` : '--'}</p>
                   </div>
                 </div>
@@ -203,7 +210,7 @@ export default function Diagnostics() {
         </TabsContent>
         
         <TabsContent value="readiness">
-          <Card>
+          <Card className="shadow-md border-gray-200 dark:border-gray-800">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Readiness Monitors</span>

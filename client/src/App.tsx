@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/hooks/use-theme";
 import { useState, useEffect } from "react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -11,6 +12,9 @@ import History from "@/pages/history";
 import Settings from "@/pages/settings";
 import ReportIssue from "@/pages/report-issue";
 import AdvancedDiagnostics from "@/pages/advanced-diagnostics";
+import Help from "@/pages/help";
+import Privacy from "@/pages/privacy";
+import Terms from "@/pages/terms";
 import DisclaimerOverlay from "@/components/DisclaimerOverlay";
 import Header from "@/components/Header";
 import { trackPageView } from "./lib/metrics";
@@ -39,18 +43,46 @@ function Router() {
         <Route path="/history" component={History} />
         <Route path="/settings" component={Settings} />
         <Route path="/report-issue" component={ReportIssue} />
+        <Route path="/help" component={Help} />
+        <Route path="/privacy" component={Privacy} />
+        <Route path="/terms" component={Terms} />
         <Route component={NotFound} />
       </Switch>
-      <footer className="bg-white border-t border-gray-200 py-4 mt-auto">
+      <footer className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800 py-6 mt-auto">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-gray-600 mb-2 md:mb-0">
-              Universal Vehicle Diagnostics &copy; {new Date().getFullYear()}. All rights reserved.
-            </p>
-            <div className="flex items-center space-x-4">
-              <a href="#" className="text-sm text-gray-600 hover:text-primary">Help</a>
-              <a href="#" className="text-sm text-gray-600 hover:text-primary">Privacy Policy</a>
-              <a href="#" className="text-sm text-gray-600 hover:text-primary">Terms of Use</a>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col items-center md:items-start gap-2">
+              <div className="flex items-center gap-2">
+                <i className="ri-car-line text-primary text-xl"></i>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Universal Vehicle Diagnostics &copy; {new Date().getFullYear()}
+                </p>
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Powered by{" "}
+                <a 
+                  href="https://www.s-tecm.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Novarisai
+                </a>
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <a href="/help" className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors flex items-center gap-1">
+                <i className="ri-question-line"></i>
+                Help
+              </a>
+              <a href="/privacy" className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors flex items-center gap-1">
+                <i className="ri-shield-line"></i>
+                Privacy
+              </a>
+              <a href="/terms" className="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors flex items-center gap-1">
+                <i className="ri-file-text-line"></i>
+                Terms
+              </a>
             </div>
           </div>
         </div>
@@ -74,15 +106,17 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <DisclaimerOverlay 
-          isVisible={!disclaimerAccepted} 
-          onAccept={handleAcceptDisclaimer} 
-        />
-        <SetupDefaultUser />
-        <Router />
-      </TooltipProvider>
+      <ThemeProvider defaultTheme="system" storageKey="vehicle-diagnostics-theme">
+        <TooltipProvider>
+          <Toaster />
+          <DisclaimerOverlay 
+            isVisible={!disclaimerAccepted} 
+            onAccept={handleAcceptDisclaimer} 
+          />
+          <SetupDefaultUser />
+          <Router />
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
