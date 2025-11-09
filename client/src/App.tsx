@@ -88,13 +88,8 @@ function App() {
     setDisclaimerAccepted(true);
   };
 
-  // Prevent hydration mismatch with ThemeProvider
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange={false}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange={false} suppressHydrationWarning>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
