@@ -1,6 +1,7 @@
 [build]
   # Install dependencies (including devDependencies for build)
-  command = "npm ci && npm run build:netlify"
+  # Use npm install instead of npm ci to ensure devDependencies are installed
+  command = "npm install && npm run build:netlify"
   # Publish directory (where the static files are output)
   publish = "dist"
   
@@ -8,8 +9,8 @@
   [build.environment]
     NODE_VERSION = "20"
     NETLIFY = "true"
-    NODE_ENV = "production"
-    NPM_FLAGS = "--include=dev"
+    # Don't set NODE_ENV=production during install, only during build
+    NPM_CONFIG_PRODUCTION = "false"
 
 # SPA redirect rules - all routes redirect to index.html for client-side routing
 [[redirects]]
