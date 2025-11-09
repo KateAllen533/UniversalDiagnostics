@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Link } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -75,8 +75,10 @@ function Router() {
 
 function App() {
   const [disclaimerAccepted, setDisclaimerAccepted] = useState<boolean>(false);
+  const [mounted, setMounted] = useState<boolean>(false);
 
   useEffect(() => {
+    setMounted(true);
     const accepted = localStorage.getItem("disclaimerAccepted") === "true";
     setDisclaimerAccepted(accepted);
   }, []);
@@ -86,8 +88,13 @@ function App() {
     setDisclaimerAccepted(true);
   };
 
+  // Prevent hydration mismatch with ThemeProvider
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange={false}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
